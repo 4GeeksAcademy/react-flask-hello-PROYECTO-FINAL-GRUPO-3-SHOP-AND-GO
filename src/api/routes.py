@@ -13,7 +13,7 @@ api = Blueprint('api', __name__)
 # Allow CORS requests to this API
 CORS(api)
 
-VALID_ROLES = ["customer","driver", "admin"]
+VALID_ROLES = ["customer","driver", "admin"] #se ve más profesional en MAYUS
 
 @api.route('/register', methods=['POST'])
 def register():
