@@ -40,3 +40,5 @@ class User(db.Model):
             "is_avaliable": self.is_avaliable # se serializa por disponibilidad de los drivers
             # do not serialize the password, its a security breach
         }
+
+        
