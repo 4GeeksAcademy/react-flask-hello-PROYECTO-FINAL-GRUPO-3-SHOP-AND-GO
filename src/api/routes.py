@@ -15,6 +15,8 @@ CORS(api)
 
 VALID_ROLES = ["customer","driver", "admin"] #se ve más profesional en MAYUS
 
+
+#REGISTER
 @api.route('/register', methods=['POST'])
 def register():
 
@@ -44,3 +46,25 @@ def register():
     db.session.commit()
 
     return jsonify({"msg": "User created successfully"}), 201
+
+
+#LOGIN
+@api.route('/login', methods = ['POST'])
+def login():
+    data = request.get_json()
+    email = data.get("email")
+    password = data.get("password")
+
+    if not email or not password:
+        return jsonify({"error": "Email and password are required"}), 400
+    
+    user = db.session.execute(select(User).where(
+        User.email == email)).scalar_one_or_none()
+    
+    if user is None:
+        return jsonify({"error": "invalid email or password"}), 401
+    if user.check_password(password):
+        access_token = create_access_token(identity=str (user.id))
+        return jsonify({"msg": "login successfully", "token": access_token}), 200
+    else: 
+        return jsonify({"error": "Invalid email or password"}), 401
