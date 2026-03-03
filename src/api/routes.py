@@ -124,3 +124,32 @@ def new_address():
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
+    
+@api.route("/addresses", methods=["GET"])
+@jwt_required()
+def get_addresses():
+    user_id = get_jwt_identity()
+
+    addresses = db.session.execute(
+        select(Address).where(Address.user_id == int(user_id))
+    ).scalars().all()
+
+    return jsonify([a.serialize() for a in addresses]), 200
+
+@api.route("/addresses/<int:address_id>", methods=["GET"])
+@jwt_required()
+def get_address(address_id):
+    user_id = int(get_jwt_identity())
+
+    address = db.session.execute(
+        select(Address).where(Address.id == address_id)
+    ).scalar_one_or_none()
+
+    if address is None:
+        return jsonify({"error": "Address not found"}), 404
+
+    #Solo el dueño puede verla
+    if address.user_id != user_id:
+        return jsonify({"error": "Forbidden"}), 403
+
+    return jsonify(address.serialize()), 200
