@@ -1,6 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import String, Integer, Boolean, ForeignKey, Float, Enum, DateTime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from flask_bcrypt import Bcrypt, generate_password_hash, check_password_hash
 from datetime import datetime
 import enum
 
@@ -59,11 +60,20 @@ class User(db.Model):
         foreign_keys="Order.driver_id"
     )
 
+    # para setear la contraseña (guardarla codificada)
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password).decode("utf-8") #para que la contraseña no salga con caracteres anomalos
+
+    # Compara si lo que escribe la persona coincide con la anterior contraseña codificada
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
+
     def serialize(self):
         return {
             "id": self.id,
             "name": self.name,
             "email": self.email,
+            "phone": self.phone,
             "role": self.role.value
         }
 
