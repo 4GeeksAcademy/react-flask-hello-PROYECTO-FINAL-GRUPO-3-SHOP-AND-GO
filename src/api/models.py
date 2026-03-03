@@ -99,6 +99,17 @@ class Address(db.Model):
     orders: Mapped[list["Order"]] = relationship(
         back_populates="address"
     )
+    def serialize(self):
+        return {
+            "id": self.id,
+            "user_id": self.user_id,
+            "street": self.street,
+            "city": self.city,
+            "postal_code": self.postal_code,
+            "latitude": self.latitude,
+            "longitude": self.longitude,
+            "label": self.label
+        }
 
 # -----------------------------------
 
@@ -113,6 +124,16 @@ class Store(db.Model):
     orders: Mapped[list["Order"]] = relationship(
         back_populates="store"
     )
+    def serialize(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "address": self.address,
+            "latitude": self.latitude,
+            "longitude": self.longitude,
+            "qr_code": self.qr_code,
+            "is_active": self.is_active
+        }
 
 # -----------------------------------
 
@@ -155,6 +176,18 @@ class Order(db.Model):
         back_populates="order",
         uselist=False
     )
+    def serialize(self):
+        return {
+            "id": self.id,
+            "user_id": self.user_id,
+            "driver_id": self.driver_id,
+            "store_id": self.store_id,
+            "address_id": self.address_id,
+            "bags_count": self.bags_count,
+            "notes": self.notes,
+            "status": self.status,
+            "amount_cents": self.amount_cents
+        }
 
 # -----------------------------------
 
@@ -173,3 +206,13 @@ class Payment(db.Model):
     order: Mapped["Order"] = relationship(
         back_populates="payment"
     )
+    def serialize(self):
+        return {
+            "id": self.id,
+            "order_id": self.order_id,
+            "amount_cents": self.amount_cents,
+            "currency": self.currency,
+            "status": self.status,
+            "stripe_session_id": self.stripe_session_id,
+            "created_at": self.created_at.isoformat() if self.created_at else None
+        }
