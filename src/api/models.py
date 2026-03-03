@@ -1,44 +1,165 @@
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import String, Boolean, Integer
-from sqlalchemy.orm import Mapped, mapped_column
-from flask_bcrypt import Bcrypt, generate_password_hash, check_password_hash
+from sqlalchemy import String, Integer, Boolean, ForeignKey, Float, Enum, DateTime
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from datetime import datetime
+import enum
 
 db = SQLAlchemy()
 
-class User(db.Model):
+# =========================
+# ENUMS
+# =========================
 
-    __tablename__ = 'users'
+class UserRole(enum.Enum):
+    user = "user"
+    driver = "driver"
+
+
+class OrderStatus(enum.Enum):
+    pending = "pending"
+    accepted = "accepted"
+    in_transit = "in_transit"
+    delivered = "delivered"
+    cancelled = "cancelled"
+
+
+class PaymentStatus(enum.Enum):
+    pending = "pending"
+    paid = "paid"
+    failed = "failed"
+
+
+# =========================
+# MODELS
+# =========================
+
+class User(db.Model):
+    __tablename__ = "user"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str] = mapped_column(String(120), unique=True, nullable=False)
+    name: Mapped[str] = mapped_column(String(120), nullable=False)
     email: Mapped[str] = mapped_column(String(120), unique=True, nullable=False)
-    phone: Mapped[str] = mapped_column(String(20), unique=True, nullable=False)
-    
-    role: Mapped[str] = mapped_column(
-        nullable=False, 
-        default='customer') #Enum = Lista cerrada de opciones válidas
-    #valores permitidos: 'customer', 'driver', 'admin'
+    phone: Mapped[int] = mapped_column(nullable=False)
     password_hash: Mapped[str] = mapped_column(nullable=False)
-    is_avaliable: Mapped[bool] = mapped_column(Boolean(), nullable=False)
+    role: Mapped[UserRole] = mapped_column(Enum(UserRole), nullable=False)
+    is_available: Mapped[bool] = mapped_column(Boolean, default=False)
 
-# para setear la contraseña (guardarla codificada)
-    def set_password(self, password):
-        self.password_hash = generate_password_hash(password).decode("utf-8") #para que la contraseña no salga con caracteres anomalos
+    # Relaciones
+    addresses: Mapped[list["Address"]] = relationship(
+        back_populates="user"
+    )
 
-# Compara si lo que escribe la persona coincide con la anterior contraseña codificada
-    def check_password(self, password):
-        return check_password_hash(self.password_hash, password)
-    
+    orders: Mapped[list["Order"]] = relationship(
+        back_populates="user",
+        foreign_keys="Order.user_id"
+    )
+
+    deliveries: Mapped[list["Order"]] = relationship(
+        back_populates="driver",
+        foreign_keys="Order.driver_id"
+    )
 
     def serialize(self):
         return {
             "id": self.id,
             "name": self.name,
             "email": self.email,
-            "phone": self.phone,
-            "role": self.role,
-            "is_avaliable": self.is_avaliable # se serializa por disponibilidad de los drivers
-            # do not serialize the password, its a security breach
+            "role": self.role.value
         }
 
-        
+
+# -----------------------------------
+
+class Address(db.Model):
+    __tablename__ = "address"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    street: Mapped[str] = mapped_column(String(200), nullable=False)
+    city: Mapped[str] = mapped_column(String(100), nullable=False)
+    postal_code: Mapped[int] = mapped_column(nullable=False)
+    latitude: Mapped[float] = mapped_column(Float)
+    longitude: Mapped[float] = mapped_column(Float)
+    label: Mapped[str] = mapped_column(String(100))
+
+    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
+    user: Mapped["User"] = relationship(
+        back_populates="addresses"
+    )
+
+    orders: Mapped[list["Order"]] = relationship(
+        back_populates="address"
+    )
+
+# -----------------------------------
+
+class Store(db.Model):
+    __tablename__ = "store"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(120), nullable=False)
+    qr_code: Mapped[str] = mapped_column(String(120), unique=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+
+    orders: Mapped[list["Order"]] = relationship(
+        back_populates="store"
+    )
+
+# -----------------------------------
+
+class Order(db.Model):
+    __tablename__ = "order"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    bags_count: Mapped[int] = mapped_column(Integer)
+    notes: Mapped[str] = mapped_column(String(500))
+    status: Mapped[OrderStatus] = mapped_column(Enum(OrderStatus), default=OrderStatus.pending)
+    amount_cents: Mapped[int] = mapped_column(Integer)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+    # Foreign Keys
+    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
+    driver_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
+    store_id: Mapped[int] = mapped_column(ForeignKey("store.id"))
+    address_id: Mapped[int] = mapped_column(ForeignKey("address.id"))
+
+    # Relaciones
+    user: Mapped["User"] = relationship(
+        back_populates="orders",
+        foreign_keys=[user_id]
+    )
+
+    driver: Mapped["User"] = relationship(
+        back_populates="deliveries",
+        foreign_keys=[driver_id]
+    )
+
+    store: Mapped["Store"] = relationship(
+        back_populates="orders"
+    )
+
+    address: Mapped["Address"] = relationship(
+        back_populates="orders"
+    )
+
+    payment: Mapped["Payment"] = relationship(
+        back_populates="order",
+        uselist=False
+    )
+
+# -----------------------------------
+
+class Payment(db.Model):
+    __tablename__ = "payment"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    amount_cents: Mapped[int] = mapped_column(Integer)
+    currency: Mapped[str] = mapped_column(String(10))
+    status: Mapped[PaymentStatus] = mapped_column(Enum(PaymentStatus), default=PaymentStatus.pending)
+    stripe_session_id: Mapped[str] = mapped_column(String(200))
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+    order_id: Mapped[int] = mapped_column(ForeignKey("order.id"), unique=True)
+
+    order: Mapped["Order"] = relationship(
+        back_populates="payment"
+    )
