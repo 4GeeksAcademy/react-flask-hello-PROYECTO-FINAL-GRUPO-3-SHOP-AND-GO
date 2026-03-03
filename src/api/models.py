@@ -117,20 +117,31 @@ class Store(db.Model):
     __tablename__ = "store"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str] = mapped_column(String(120), nullable=False)
-    qr_code: Mapped[str] = mapped_column(String(120), unique=True)
-    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
 
+    name: Mapped[str] = mapped_column(String(120), nullable=False)
+
+    qr_code: Mapped[str] = mapped_column(
+        String(120),
+        unique=True,
+        nullable=False
+    )
+
+    is_active: Mapped[bool] = mapped_column(
+        Boolean,
+        default=True,
+        nullable=False
+    )
+
+    # Relaciones
     orders: Mapped[list["Order"]] = relationship(
+        "Order",
         back_populates="store"
     )
+
     def serialize(self):
         return {
             "id": self.id,
             "name": self.name,
-            "address": self.address,
-            "latitude": self.latitude,
-            "longitude": self.longitude,
             "qr_code": self.qr_code,
             "is_active": self.is_active
         }
