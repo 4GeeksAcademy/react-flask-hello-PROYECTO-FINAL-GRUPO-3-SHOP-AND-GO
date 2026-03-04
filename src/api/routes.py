@@ -46,8 +46,8 @@ def register():
         email=email,
         name=name,
         phone=int(phone),
-        role=UserRole(role),      # <-- Enum correcto
-        is_available=True         # <-- nombre correcto (sin typo)
+        role=UserRole(role),      
+        is_available=True         
     )
     new_user.set_password(password)
 
@@ -94,7 +94,7 @@ def new_address():
     if not street or not city or not postal_code:
         return jsonify({"error": "street, city and postal_code are required"}), 400
 
-    # user_id viene del token (en tu login lo guardas como string)
+    # user_id viene del token 
     user_id = get_jwt_identity()
 
     
