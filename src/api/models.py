@@ -1,6 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import String, Integer, Boolean, ForeignKey, Float, Enum, DateTime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from flask_bcrypt import Bcrypt, generate_password_hash, check_password_hash
 from datetime import datetime
 import enum
 
@@ -13,6 +14,7 @@ db = SQLAlchemy()
 class UserRole(enum.Enum):
     user = "user"
     driver = "driver"
+    admin = "admin"
 
 class OrderStatus(enum.Enum):
     pending = "pending"
@@ -45,6 +47,15 @@ class User(db.Model):
     orders: Mapped[list["Order"]] = relationship(back_populates="user", foreign_keys="Order.user_id")
     deliveries: Mapped[list["Order"]] = relationship(back_populates="driver", foreign_keys="Order.driver_id")
 
+# para setear la contraseña (guardarla codificada)
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password).decode("utf-8") #para que la contraseña no salga con caracteres anomalos
+
+    # Compara si lo que escribe la persona coincide con la anterior contraseña codificada
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
+
+
     def serialize(self):
         return {
             "id": self.id,
@@ -64,10 +75,10 @@ class Address(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
     street: Mapped[str] = mapped_column(String(200), nullable=False)
     city: Mapped[str] = mapped_column(String(100), nullable=False)
-    postal_code: Mapped[int] = mapped_column(nullable=False)
-    latitude: Mapped[float] = mapped_column(Float)
-    longitude: Mapped[float] = mapped_column(Float)
-    label: Mapped[str] = mapped_column(String(100))
+    postal_code: Mapped[str] = mapped_column(String(10), nullable=False)
+    latitude: Mapped[float] = mapped_column(Float, nullable=True) #este campo no puede ser obligatorio porque el user no puede mandar la latitud
+    longitude: Mapped[float] = mapped_column(Float, nullable=True) #este campo no puede ser obligatorio porque el user no puede mandar la longitud
+    label: Mapped[str] = mapped_column(String(100), nullable=True)
 
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
     user: Mapped["User"] = relationship(back_populates="addresses")
