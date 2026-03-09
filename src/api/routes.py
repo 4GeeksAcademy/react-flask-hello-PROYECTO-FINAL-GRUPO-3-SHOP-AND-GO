@@ -2,7 +2,7 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 from flask import Flask, request, jsonify, url_for, Blueprint
-from api.models import db, User, Address, UserRole
+from api.models import db, User, Address, UserRole, Store
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
@@ -158,13 +158,34 @@ def get_address(address_id):
 
     return jsonify(address.serialize()), 200
 
-#CREAR TIENDA
+#CREAR TIENDAS
 
 @api.route("/stores", methods=['POST'])
-@jwt_required()
+# @jwt_required() #solo admin puede crear tiendas
 def create_store():
     data = request.get_json()
+    name = data.get("name")
+    qr_code = data.get("qr_code")
 
+    if not name or not qr_code:
+        return jsonify({"error": "name and qr_code required"}), 400
+    
+    new_store = Store(
+        name=name,
+        qr_code=qr_code,
+        is_active=True
+    )
+
+    db.session.add(new_store)
+    db.session.commit()
+    
+    return jsonify(new_store.serialize()), 201
 
 #OBTENER TODAS LAS TIENDAS
 @api.route("/stores", methods=['GET'])
+def get_stores():
+    stores = db.session.execute(
+        select(Store).where(Store.is_active == True)
+    ).scalars().all()
+
+    return jsonify([s.serialize() for s in stores]), 200
