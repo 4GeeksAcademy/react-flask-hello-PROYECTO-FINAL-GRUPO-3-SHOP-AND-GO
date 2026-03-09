@@ -85,7 +85,7 @@ def login():
 @api.route("/addresses", methods=["POST"])
 @jwt_required()
 def new_address():
-    data = request.get_json() or {}
+    data = request.get_json() 
 
     street = data.get("street")
     city = data.get("city")
