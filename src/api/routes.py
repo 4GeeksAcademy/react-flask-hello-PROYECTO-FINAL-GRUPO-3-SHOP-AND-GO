@@ -157,3 +157,14 @@ def get_address(address_id):
         return jsonify({"error": "Forbidden"}), 403
 
     return jsonify(address.serialize()), 200
+
+#CREAR TIENDA
+
+@api.route("/stores", methods=['POST'])
+@jwt_required()
+def create_store():
+    data = request.get_json()
+
+
+#OBTENER TODAS LAS TIENDAS
+@api.route("/stores", methods=['GET'])
