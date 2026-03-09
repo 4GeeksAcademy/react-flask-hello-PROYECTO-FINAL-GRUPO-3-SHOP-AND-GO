@@ -1,4 +1,6 @@
 from flask import jsonify, url_for
+import os
+import requests
 
 class APIException(Exception):
     status_code = 400
@@ -30,6 +32,10 @@ def generate_sitemap(app):
             if "/admin/" not in url:
                 links.append(url)
 
+
+
+                
+
     links_html = "".join(["<li><a href='" + y + "'>" + y + "</a></li>" for y in links])
     return """
         <div style="text-align: center;">
@@ -39,3 +45,32 @@ def generate_sitemap(app):
         <p>Start working on your project by following the <a href="https://start.4geeksacademy.com/starters/full-stack" target="_blank">Quick Start</a></p>
         <p>Remember to specify a real endpoint path like: </p>
         <ul style="text-align: left;">"""+links_html+"</ul></div>"
+
+
+def geoapify_forward_geocode(street, city, postal_code):
+    api_key = os.getenv("GEOAPIFY_API_KEY")
+
+    text = f"{street}, {city}, {postal_code}"
+
+    url = "https://api.geoapify.com/v1/geocode/search"
+    params = {
+        "text": text,
+        "format": "json",
+        "apiKey": api_key
+    }
+
+    response = requests.get(url, params=params)
+    data = response.json()
+
+    results = data.get("results", [])
+
+    if not results:
+        return None
+
+    first = results[0]
+
+    return {
+        "lat": first.get("lat"),
+        "lon": first.get("lon"),
+        "formatted": first.get("formatted")
+    }

@@ -7,6 +7,8 @@ from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from sqlalchemy import select
+from api.utils import geoapify_forward_geocode
+import requests 
 
 api = Blueprint('api', __name__)
 
@@ -83,43 +85,57 @@ def login():
 @api.route("/addresses", methods=["POST"])
 @jwt_required()
 def new_address():
-    data = request.get_json()
+    data = request.get_json() or {}
+
     street = data.get("street")
     city = data.get("city")
     postal_code = data.get("postal_code")
-    latitude = data.get("latitude")
-    longitude = data.get("longitude")
     label = data.get("label")
 
     if not street or not city or not postal_code:
         return jsonify({"error": "street, city and postal_code are required"}), 400
 
-    # user_id viene del token 
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
 
-    
     user = db.session.execute(
-        select(User).where(User.id == int(user_id))
+        select(User).where(User.id == user_id)
     ).scalar_one_or_none()
 
     if user is None:
         return jsonify({"error": "User not found"}), 404
 
     try:
+        geo_data = geoapify_forward_geocode(
+            street=street,
+            city=city,
+            postal_code=str(postal_code)
+        )
+
+        if geo_data is None:
+            return jsonify({"error": "Address could not be geocoded"}), 400
+
         new_address = Address(
             street=street,
             city=city,
             postal_code=postal_code,
-            latitude=latitude,
-            longitude=longitude,
+            latitude=geo_data["lat"],
+            longitude=geo_data["lon"],
             label=label,
-            user_id=int(user_id)
+            user_id=user_id
         )
 
         db.session.add(new_address)
         db.session.commit()
 
-        return jsonify(new_address.serialize()), 201
+        return jsonify({
+            "msg": "Address created successfully",
+            "address": new_address.serialize(),
+            "geocoded_address": geo_data["formatted"]
+        }), 201
+
+    except requests.exceptions.RequestException as e:
+        db.session.rollback()
+        return jsonify({"error": f"Geoapify request failed: {str(e)}"}), 502
 
     except Exception as e:
         db.session.rollback()
