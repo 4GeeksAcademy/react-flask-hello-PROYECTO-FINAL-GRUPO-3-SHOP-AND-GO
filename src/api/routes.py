@@ -2,7 +2,7 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 from flask import Flask, request, jsonify, url_for, Blueprint
-from api.models import db, User, Address, UserRole
+from api.models import db, User, Address, UserRole, Store
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
@@ -57,6 +57,127 @@ def register():
     db.session.commit()
 
     return jsonify({"msg": "User created successfully", "user":new_user.serialize()}), 201
+# =========================
+# USER CRUD
+# =========================
+
+
+@api.route('/users', methods=['GET'])
+@jwt_required()
+def get_users():
+    current_user_id = int(get_jwt_identity())
+
+    current_user = db.session.execute(
+        select(User).where(User.id == current_user_id)
+    ).scalar_one_or_none()
+
+    if current_user is None or current_user.role != UserRole.admin:
+        return jsonify({"error": "Forbidden, admin only"}), 403
+
+    users = db.session.execute(select(User)).scalars().all()
+
+    return jsonify([user.serialize() for user in users]), 200
+
+
+
+@api.route('/users/<int:user_id>', methods=['GET'])
+@jwt_required()
+def get_user(user_id):
+    current_user_id = int(get_jwt_identity())
+
+    current_user = db.session.execute(
+        select(User).where(User.id == current_user_id)
+    ).scalar_one_or_none()
+
+    
+    if current_user_id != user_id and current_user.role != UserRole.admin:
+        return jsonify({"error": "Forbidden"}), 403
+
+    user = db.session.execute(
+        select(User).where(User.id == user_id)
+    ).scalar_one_or_none()
+
+    if user is None:
+        return jsonify({"error": "User not found"}), 404
+
+    return jsonify(user.serialize()), 200
+
+
+
+@api.route('/users/<int:user_id>', methods=['PUT'])
+@jwt_required()
+def update_user(user_id):
+    current_user_id = int(get_jwt_identity())
+
+    current_user = db.session.execute(
+        select(User).where(User.id == current_user_id)
+    ).scalar_one_or_none()
+
+    
+    if current_user_id != user_id and current_user.role != UserRole.admin:
+        return jsonify({"error": "Forbidden"}), 403
+
+    user = db.session.execute(
+        select(User).where(User.id == user_id)
+    ).scalar_one_or_none()
+
+    if user is None:
+        return jsonify({"error": "User not found"}), 404
+
+    data = request.get_json() or {}
+
+    
+    if "name" in data:
+        user.name = data["name"]
+
+    if "phone" in data:
+        user.phone = data["phone"]
+
+    if "password" in data:
+        user.set_password(data["password"])  # hashea la nueva contraseña
+
+    # solo el admin puede cambiar el rol
+    if "role" in data:
+        if current_user.role != UserRole.admin:
+            return jsonify({"error": "Only admin can change roles"}), 403
+        valid_roles = [r.value for r in UserRole]
+        if data["role"] not in valid_roles:
+            return jsonify({"error": f"Invalid role. Valid roles: {valid_roles}"}), 400
+        user.role = UserRole(data["role"])
+
+    db.session.commit()
+
+    return jsonify({
+        "msg": "User updated successfully",
+        "user": user.serialize()
+    }), 200
+
+
+# ── DELETE USER (dueño o admin) ────────────────────────────────
+@api.route('/users/<int:user_id>', methods=['DELETE'])
+@jwt_required()
+def delete_user(user_id):
+    current_user_id = int(get_jwt_identity())
+
+    current_user = db.session.execute(
+        select(User).where(User.id == current_user_id)
+    ).scalar_one_or_none()
+
+    # solo puede borrarlo el dueño o un admin
+    if current_user_id != user_id and current_user.role != UserRole.admin:
+        return jsonify({"error": "Forbidden"}), 403
+
+    user = db.session.execute(
+        select(User).where(User.id == user_id)
+    ).scalar_one_or_none()
+
+    if user is None:
+        return jsonify({"error": "User not found"}), 404
+
+    db.session.delete(user)
+    db.session.commit()
+
+    return jsonify({"msg": "User deleted successfully"}), 200
 
 
 #LOGIN
