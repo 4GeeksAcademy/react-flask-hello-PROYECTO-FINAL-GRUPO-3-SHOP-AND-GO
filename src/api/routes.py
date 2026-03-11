@@ -290,7 +290,7 @@ def create_order():
     notes        = data.get("notes")
 
     amount_cents = data.get("amount_cents")
-    store_id     = data.get("store_id")
+    git_id     = data.get("store_id")
     address_id   = data.get("address_id")
 
     if not amount_cents or not store_id or not address_id:
