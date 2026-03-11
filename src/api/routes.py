@@ -278,6 +278,38 @@ def get_address(address_id):
 
     return jsonify(address.serialize()), 200
 
+#CREAR TIENDAS
+
+@api.route("/stores", methods=['POST'])
+# @jwt_required() #solo admin puede crear tiendas
+def create_store():
+    data = request.get_json()
+    name = data.get("name")
+    qr_code = data.get("qr_code")
+
+    if not name or not qr_code:
+        return jsonify({"error": "name and qr_code required"}), 400
+    
+    new_store = Store(
+        name=name,
+        qr_code=qr_code,
+        is_active=True
+    )
+
+    db.session.add(new_store)
+    db.session.commit()
+    
+    return jsonify(new_store.serialize()), 201
+
+#OBTENER TODAS LAS TIENDAS
+@api.route("/stores", methods=['GET'])
+def get_stores():
+    stores = db.session.execute(
+        select(Store).where(Store.is_active == True)
+    ).scalars().all()
+
+    return jsonify([s.serialize() for s in stores]), 200
+
 
 @api.route('/orders', methods=['POST'])
 @jwt_required()
