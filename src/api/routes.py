@@ -310,6 +310,74 @@ def get_stores():
 
     return jsonify([s.serialize() for s in stores]), 200
 
+# ── PUT UPDATE STORE (solo admin) ─────────────────────────────
+@api.route('/stores/<int:store_id>', methods=['PUT'])
+@jwt_required()
+def update_store(store_id):
+    user_id = int(get_jwt_identity())
+
+    current_user = db.session.execute(
+        select(User).where(User.id == user_id)
+    ).scalar_one_or_none()
+
+    # solo el admin puede editar tiendas
+    if current_user is None or current_user.role != UserRole.admin:
+        return jsonify({"error": "Forbidden, admin only"}), 403
+
+    store = db.session.execute(
+        select(Store).where(Store.id == store_id)
+    ).scalar_one_or_none()
+
+    if store is None:
+        return jsonify({"error": "Store not found"}), 404
+
+    data = request.get_json() or {}
+
+    # solo se actualizan los campos que lleguen
+    if "name" in data:
+        store.name = data["name"]
+
+    if "qr_code" in data:
+        store.qr_code = data["qr_code"]
+
+    if "is_active" in data:
+        store.is_active = data["is_active"]
+
+    db.session.commit()
+
+    return jsonify({
+        "msg": "Store updated successfully",
+        "store": store.serialize()
+    }), 200
+
+# ── DELETE STORE (solo admin) ──────────────────────────────────
+@api.route('/stores/<int:store_id>', methods=['DELETE'])
+@jwt_required()
+def delete_store(store_id):
+    user_id = int(get_jwt_identity())
+
+    current_user = db.session.execute(
+        select(User).where(User.id == user_id)
+    ).scalar_one_or_none()
+
+    # solo el admin puede eliminar tiendas
+    if current_user is None or current_user.role != UserRole.admin:
+        return jsonify({"error": "Forbidden, admin only"}), 403
+
+    store = db.session.execute(
+        select(Store).where(Store.id == store_id)
+    ).scalar_one_or_none()
+
+    if store is None:
+        return jsonify({"error": "Store not found"}), 404
+
+    # en vez de borrar físicamente, desactivamos la tienda
+    # así no se pierden los pedidos asociados a ella
+    store.is_active = False
+    db.session.commit()
+
+    return jsonify({"msg": "Store deactivated successfully"}), 200
+
 
 @api.route('/orders', methods=['POST'])
 @jwt_required()
@@ -322,7 +390,7 @@ def create_order():
     notes        = data.get("notes")
 
     amount_cents = data.get("amount_cents")
-    git_id     = data.get("store_id")
+    store_id     = data.get("store_id")
     address_id   = data.get("address_id")
 
     if not amount_cents or not store_id or not address_id:
