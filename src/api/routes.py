@@ -278,6 +278,84 @@ def get_address(address_id):
 
     return jsonify(address.serialize()), 200
 
+# ── PUT UPDATE ADDRESS (solo el dueño) ────────────────────────
+@api.route('/addresses/<int:address_id>', methods=['PUT'])
+@jwt_required()
+def update_address(address_id):
+    user_id = int(get_jwt_identity())
+
+    address = db.session.execute(
+        select(Address).where(Address.id == address_id)
+    ).scalar_one_or_none()
+
+    if address is None:
+        return jsonify({"error": "Address not found"}), 404
+
+    if address.user_id != user_id:
+        return jsonify({"error": "Forbidden"}), 403
+
+    data = request.get_json() or {}
+
+    # solo se actualizan los campos que lleguen
+    if "street" in data:
+        address.street = data["street"]
+
+    if "city" in data:
+        address.city = data["city"]
+
+    if "postal_code" in data:
+        address.postal_code = data["postal_code"]
+
+    if "label" in data:
+        address.label = data["label"]
+
+    # si cambia la dirección reseteamos las coordenadas
+    # ya que las anteriores ya no son válidas
+    if "street" in data or "city" in data or "postal_code" in data:
+        address.latitude = None
+        address.longitude = None
+
+    db.session.commit()
+
+    return jsonify({
+        "msg": "Address updated successfully",
+        "address": address.serialize()
+    }), 200
+
+
+# ── DELETE ADDRESS (solo el dueño) ────────────────────────────
+@api.route('/addresses/<int:address_id>', methods=['DELETE'])
+@jwt_required()
+def delete_address(address_id):
+    user_id = int(get_jwt_identity())
+
+    address = db.session.execute(
+        select(Address).where(Address.id == address_id)
+    ).scalar_one_or_none()
+
+    if address is None:
+        return jsonify({"error": "Address not found"}), 404
+
+    # solo el dueño puede eliminar su dirección
+    if address.user_id != user_id:
+        return jsonify({"error": "Forbidden"}), 403
+
+    # verificamos que no haya pedidos activos con esta dirección
+    active_order = db.session.execute(
+        select(Order).where(
+            Order.address_id == address_id,
+            Order.status.in_([OrderStatus.pending, OrderStatus.accepted, OrderStatus.in_transit])
+        )
+    ).scalar_one_or_none()
+
+    if active_order:
+        return jsonify({"error": "Cannot delete address with active orders"}), 400
+
+    db.session.delete(address)
+    db.session.commit()
+
+    return jsonify({"msg": "Address deleted successfully"}), 200
+
 #CREAR TIENDAS
 
 @api.route("/stores", methods=['POST'])
