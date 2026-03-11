@@ -277,3 +277,79 @@ def get_address(address_id):
         return jsonify({"error": "Forbidden"}), 403
 
     return jsonify(address.serialize()), 200
+
+
+@api.route('/orders', methods=['POST'])
+@jwt_required()
+def create_order():
+
+    user_id = int(get_jwt_identity())
+    data = request.get_json() or {}
+
+    bags_count   = data.get("bags_count")
+    notes        = data.get("notes")
+
+    amount_cents = data.get("amount_cents")
+    git_id     = data.get("store_id")
+    address_id   = data.get("address_id")
+
+    if not amount_cents or not store_id or not address_id:
+        return jsonify({"error": "amount_cents, store_id and address_id are required"}), 400
+
+    # ── VERIFICAR QUE EL USUARIO EXISTE ───────────────────────
+
+    user = db.session.execute(
+        select(User).where(User.id == user_id)
+    ).scalar_one_or_none() 
+    if user is None:
+        return jsonify({"error": "User not found"}), 404    
+ # ── VERIFICAR QUE LA TIENDA EXISTE ────────────────────────
+    store = db.session.execute(
+        select(Store).where(Store.id == store_id)
+    ).scalar_one_or_none()
+
+    if store is None:
+        return jsonify({"error": "Store not found"}), 404
+    # ── VERIFICAR QUE LA DIRECCIÓN EXISTE Y ES DEL USUARIO ────
+
+    address = db.session.execute(
+        select(Address).where(Address.id == address_id)
+    ).scalar_one_or_none()
+
+    if address is None:
+        return jsonify({"error": "Address not found"}), 404
+
+    if address.user_id != user_id:
+        return jsonify({"error": "This address does not belong to you"}), 403
+   
+    # ── CREAR EL PEDIDO ────────────────────────────────────────
+
+    try:
+        new_order = Order(
+            bags_count=bags_count,
+            notes=notes,
+            amount_cents=amount_cents,
+            status=OrderStatus.pending,  
+                                         
+            user_id=user_id,             
+            store_id=store_id,           
+            address_id=address_id        
+           
+        )
+
+        db.session.add(new_order)
+
+        db.session.commit()
+
+        return jsonify({
+            "msg": "Order created successfully",
+            "order": new_order.serialize()  
+        }), 201
+        
+
+    except Exception as e:
+        # si algo falla, deshacemos todos los cambios de esta sesión
+        # para no dejar datos a medias en la BD
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+       
