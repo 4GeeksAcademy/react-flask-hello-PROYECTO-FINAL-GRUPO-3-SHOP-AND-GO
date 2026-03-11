@@ -72,3 +72,5 @@ export const Jumbotron = () => {
 };
 
 // https://unsplash.com/es para conseguir imagenes gratis
+// antes de hacer el pr de esto tengo que mirar el .env que esté correctamente ingresado en el gitingore.
+// https://www.youtube.com/watch?v=17UVejOw3zA
