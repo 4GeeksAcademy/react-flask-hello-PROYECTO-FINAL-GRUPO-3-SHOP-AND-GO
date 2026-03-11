@@ -1,7 +1,7 @@
 from flask import jsonify, url_for
 import os
 import requests
-
+print("API KEY:", os.getenv("GEOAPIFY_API_KEY"))
 class APIException(Exception):
     status_code = 400
 

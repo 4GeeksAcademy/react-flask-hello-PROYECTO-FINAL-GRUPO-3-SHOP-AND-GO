@@ -173,3 +173,100 @@ def get_address(address_id):
         return jsonify({"error": "Forbidden"}), 403
 
     return jsonify(address.serialize()), 200
+
+#ACTUALIZAR DIRECCIONES POR ID
+@api.route("/addresses/<int:address_id>", methods=["PUT"])
+@jwt_required()
+def update_address(address_id):
+
+    data = request.get_json()
+
+    street = data.get("street")
+    city = data.get("city")
+    postal_code = data.get("postal_code")
+    label = data.get("label")
+
+    user_id = int(get_jwt_identity())
+
+    address = db.session.execute(
+        select(Address).where(
+            Address.id == address_id,
+            Address.user_id == user_id
+        )
+    ).scalar_one_or_none()
+
+    if address is None:
+        return jsonify({"error": "Address not found"}), 404
+
+    try:
+
+        # Si cambian los datos de dirección se recalculan las coordenadas
+        if street or city or postal_code:
+
+            new_street = street if street else address.street
+            new_city = city if city else address.city
+            new_postal_code = postal_code if postal_code else address.postal_code
+
+            geo_data = geoapify_forward_geocode(
+                street=new_street,
+                city=new_city,
+                postal_code=str(new_postal_code)
+            )
+
+            if geo_data is None:
+                return jsonify({"error": "Address could not be geocoded"}), 400
+
+            address.latitude = geo_data["lat"]
+            address.longitude = geo_data["lon"]
+
+            address.street = new_street
+            address.city = new_city
+            address.postal_code = new_postal_code
+
+        if label is not None:
+            address.label = label
+
+        db.session.commit()
+
+        return jsonify({
+            "msg": "Address updated successfully",
+            "address": address.serialize()
+        }), 200
+
+    except requests.exceptions.RequestException as e:
+        db.session.rollback()
+        return jsonify({"error": f"Geoapify request failed: {str(e)}"}), 502
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+    
+#ELIMINAR DIRECCION POR ID
+@api.route("/addresses/<int:address_id>", methods=["DELETE"])
+@jwt_required()
+def delete_address(address_id):
+
+    user_id = int(get_jwt_identity())
+
+    address = db.session.execute(
+        select(Address).where(
+            Address.id == address_id,
+            Address.user_id == user_id
+        )
+    ).scalar_one_or_none()
+
+    if address is None:
+        return jsonify({"error": "Address not found"}), 404
+
+    try:
+        db.session.delete(address)
+        db.session.commit()
+
+        return jsonify({
+            "msg": "Address deleted successfully"
+        }), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+
