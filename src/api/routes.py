@@ -200,12 +200,11 @@ def login():
 @api.route("/addresses", methods=["POST"])
 @jwt_required()
 def new_address():
-    data = request.get_json()
+    data = request.get_json() 
+
     street = data.get("street")
     city = data.get("city")
     postal_code = data.get("postal_code")
-    latitude = data.get("latitude")
-    longitude = data.get("longitude")
     label = data.get("label")
 
     if not street or not city or not postal_code:
@@ -213,29 +212,45 @@ def new_address():
     
     user_id = get_jwt_identity()
 
-    
     user = db.session.execute(
-        select(User).where(User.id == int(user_id))
+        select(User).where(User.id == user_id)
     ).scalar_one_or_none()
 
     if user is None:
         return jsonify({"error": "User not found"}), 404
 
     try:
+        geo_data = geoapify_forward_geocode(
+            street=street,
+            city=city,
+            postal_code=str(postal_code)
+        )
+
+        if geo_data is None:
+            return jsonify({"error": "Address could not be geocoded"}), 400
+
         new_address = Address(
             street=street,
             city=city,
             postal_code=postal_code,
-            latitude=latitude,
-            longitude=longitude,
+            latitude=geo_data["lat"],
+            longitude=geo_data["lon"],
             label=label,
-            user_id=int(user_id)
+            user_id=user_id
         )
 
         db.session.add(new_address)
         db.session.commit()
 
-        return jsonify(new_address.serialize()), 201
+        return jsonify({
+            "msg": "Address created successfully",
+            "address": new_address.serialize(),
+            "geocoded_address": geo_data["formatted"]
+        }), 201
+
+    except requests.exceptions.RequestException as e:
+        db.session.rollback()
+        return jsonify({"error": f"Geoapify request failed: {str(e)}"}), 502
 
     except Exception as e:
         db.session.rollback()
@@ -274,35 +289,101 @@ def get_address(address_id):
 
     return jsonify(address.serialize()), 200
 
-#CREAR TIENDAS
+#ACTUALIZAR DIRECCIONES POR ID
+@api.route("/addresses/<int:address_id>", methods=["PUT"])
+@jwt_required()
+def update_address(address_id):
 
-@api.route("/stores", methods=['POST'])
-# @jwt_required() #solo admin puede crear tiendas
-def create_store():
     data = request.get_json()
-    name = data.get("name")
-    qr_code = data.get("qr_code")
 
-    if not name or not qr_code:
-        return jsonify({"error": "name and qr_code required"}), 400
+    street = data.get("street")
+    city = data.get("city")
+    postal_code = data.get("postal_code")
+    label = data.get("label")
+
+    user_id = int(get_jwt_identity())
+
+    address = db.session.execute(
+        select(Address).where(
+            Address.id == address_id,
+            Address.user_id == user_id
+        )
+    ).scalar_one_or_none()
+
+    if address is None:
+        return jsonify({"error": "Address not found"}), 404
+
+    try:
+
+        # Si cambian los datos de dirección se recalculan las coordenadas
+        if street or city or postal_code:
+
+            new_street = street if street else address.street
+            new_city = city if city else address.city
+            new_postal_code = postal_code if postal_code else address.postal_code
+
+            geo_data = geoapify_forward_geocode(
+                street=new_street,
+                city=new_city,
+                postal_code=str(new_postal_code)
+            )
+
+            if geo_data is None:
+                return jsonify({"error": "Address could not be geocoded"}), 400
+
+            address.latitude = geo_data["lat"]
+            address.longitude = geo_data["lon"]
+
+            address.street = new_street
+            address.city = new_city
+            address.postal_code = new_postal_code
+
+        if label is not None:
+            address.label = label
+
+        db.session.commit()
+
+        return jsonify({
+            "msg": "Address updated successfully",
+            "address": address.serialize()
+        }), 200
+
+    except requests.exceptions.RequestException as e:
+        db.session.rollback()
+        return jsonify({"error": f"Geoapify request failed: {str(e)}"}), 502
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
     
-    new_store = Store(
-        name=name,
-        qr_code=qr_code,
-        is_active=True
-    )
+#ELIMINAR DIRECCION POR ID
+@api.route("/addresses/<int:address_id>", methods=["DELETE"])
+@jwt_required()
+def delete_address(address_id):
 
-    db.session.add(new_store)
-    db.session.commit()
-    
-    return jsonify(new_store.serialize()), 201
+    user_id = int(get_jwt_identity())
 
-#OBTENER TODAS LAS TIENDAS
-@api.route("/stores", methods=['GET'])
-def get_stores():
-    stores = db.session.execute(
-        select(Store).where(Store.is_active == True)
-    ).scalars().all()
+    address = db.session.execute(
+        select(Address).where(
+            Address.id == address_id,
+            Address.user_id == user_id
+        )
+    ).scalar_one_or_none()
+
+    if address is None:
+        return jsonify({"error": "Address not found"}), 404
+
+    try:
+        db.session.delete(address)
+        db.session.commit()
+
+        return jsonify({
+            "msg": "Address deleted successfully"
+        }), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
 
     return jsonify([s.serialize() for s in stores]), 200
 
