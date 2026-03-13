@@ -10,6 +10,9 @@ import { Home } from "./pages/Home";
 import { Single } from "./pages/Single";
 import { Demo } from "./pages/Demo";
 import { Authpage } from "./pages/Authpage";
+import { Howorks } from "./pages/Howorks";
+import { Foriders } from "./pages/Foriders";
+import { Help } from "./pages/Help";
 
 export const router = createBrowserRouter(
     createRoutesFromElements(
@@ -28,6 +31,9 @@ export const router = createBrowserRouter(
         <Route path="/demo" element={<Demo />} />
         <Route path="/register" element={<Authpage/>}/> {/* //Register */}
         <Route path="/Login" element={<Authpage/>}/> {/* //Login */}
+        <Route path="/Howorks" element={<Howorks/>}/> {/* Cómo funciona*/}
+        <Route path="/Foriders" element={<Foriders/>}/> {/* Para riders*/}
+        <Route path="/Help" element={<Help/>}/> {/* Ayuda*/}
       </Route>
     )
 );

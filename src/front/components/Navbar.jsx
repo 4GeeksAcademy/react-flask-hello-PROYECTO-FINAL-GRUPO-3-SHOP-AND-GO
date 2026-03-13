@@ -24,12 +24,12 @@ export const Navbar = () => {
 
 				<div className="collapse navbar-collapse" id="navbarNavAltMarkup">
 					<div className="navbar-nav navbar-links">
-						<a className= "nav-link" href=""> Inicio</a>
-						<a className="nav-link" href=""> Cómo funciona</a>
-						<a className="nav-link" href=""> Para Riders</a>
-						<a className="nav-link" href=""> Ayuda </a>
+						<a className= "nav-link" href="/"> Inicio</a>
+						<a className="nav-link" href="/Howorks"> Cómo funciona</a>
+						<a className="nav-link" href="/Foriders"> Para Riders</a>
+						<a className="nav-link" href="/Help"> Ayuda </a>
 						<a className="nav-link" href="/login">Iniciar sesión</a>
-						<a className="nav-link" href="/profile">Mi Perfil</a>
+						{/* <a className="nav-link" href="/profile">Mi Perfil</a> esto queda pdte ver si va acá*/}
 						<a className="btn-register" href="/register">Registrarse</a>
 					</div>
 				</div>
