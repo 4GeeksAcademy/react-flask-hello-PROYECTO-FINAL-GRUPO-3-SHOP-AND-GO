@@ -93,10 +93,18 @@ def calculate_distance(lat1, lon1, lat2, lon2):
     return R * c
 
 
-def calculate_order_price(distance_km):
-    base_price = 3
+def calculate_order_price(distance_km, bags_count):
+    base_price = 3.0
     price_per_km = 1.2
+    price_per_bag = 0.5
+    minimum_price = 4.0
 
-    total_price = base_price + (distance_km * price_per_km)
+    total_price = (
+        base_price
+        + (distance_km * price_per_km)
+        + (bags_count * price_per_bag)
+    )
 
-    return round(total_price, 2)
+    final_price = max(total_price, minimum_price)
+
+    return round(final_price, 2)
