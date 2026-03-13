@@ -1,0 +1,247 @@
+/* ============================================
+   JUMBOTRON PRINCIPAL
+   ============================================ */
+.jumbotron-custom {
+  background: linear-gradient(135deg, #A855F7 0%, #9333EA 30%, #7C3AED 60%, #6D28D9 100%);
+  min-height: 90vh;
+  padding: 3rem 2rem 4rem;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ============================================
+   BADGE "Riders disponibles ahora"
+   ============================================ */
+.badge-disponible {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  padding: 0.75rem 1.5rem;
+  border-radius: 50px;
+  color: white;
+  font-weight: 600;
+  font-size: 0.95rem;
+  margin-bottom: 2.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  max-width: fit-content;
+}
+
+.dot-green {
+  width: 10px;
+  height: 10px;
+  background: #10B981;
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.6);
+  animation: pulse-dot 2s infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { 
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% { 
+    opacity: 0.7;
+    transform: scale(1.1);
+  }
+}
+
+/* ============================================
+   CONTAINER DEL CONTENIDO
+   ============================================ */
+.jumbotron-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+}
+
+/* ============================================
+   LADO IZQUIERDO - CONTENIDO
+   ============================================ */
+.jumbotron-content {
+  color: white;
+}
+
+.jumbotron-title {
+  font-size: 4.5rem;
+  font-weight: 900;
+  line-height: 1;
+  margin-bottom: 1.5rem;
+  letter-spacing: -0.02em;
+}
+
+.highlight {
+  color: #FDE047; /* Amarillo */
+  display: inline-block;
+}
+
+.jumbotron-text {
+  font-size: 1.15rem;
+  line-height: 1.7;
+  margin-bottom: 2.5rem;
+  opacity: 0.95;
+  max-width: 90%;
+}
+
+/* ============================================
+   BOTONES
+   ============================================ */
+.jumbotron-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 4rem;
+  flex-wrap: wrap;
+}
+
+/* Botón principal - blanco */
+.btn-primary-hero {
+  background: white;
+  color: #7C3AED;
+  padding: 1rem 2.25rem;
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 1.05rem;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-primary-hero:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+  background: #F9FAFB;
+}
+
+/* Botón secundario - transparente con borde */
+.btn-secondary-hero {
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(10px);
+  color: white;
+  padding: 1rem 2rem;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 1.05rem;
+  text-decoration: none;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-secondary-hero:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-2px);
+}
+
+/* ============================================
+   STATS - 15min, 500+, 98%
+   ============================================ */
+.jumbotron-stats {
+  display: grid;
+  grid-template-columns: repeat(3, auto);
+  gap: 3rem;
+  justify-content: start;
+}
+
+.stat-item h3 {
+  font-size: 3rem;
+  font-weight: 900;
+  margin-bottom: 0.25rem;
+  line-height: 1;
+}
+
+.stat-item p {
+  font-size: 0.95rem;
+  opacity: 0.85;
+  font-weight: 500;
+}
+
+/* ============================================
+   LADO DERECHO - IMAGEN
+   ============================================ */
+.jumbotron-image {
+  position: relative;
+}
+
+.jumbotron-image img {
+  width: 100%;
+  height: auto;
+  max-height: 550px;
+  border-radius: 28px;
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.35);
+  object-fit: cover;
+  border: 4px solid rgba(255, 255, 255, 0.15);
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 992px) {
+  .jumbotron-container {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+
+  .jumbotron-title {
+    font-size: 3.5rem;
+  }
+
+  .jumbotron-stats {
+    gap: 2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .jumbotron-custom {
+    padding: 2rem 1.5rem 3rem;
+  }
+
+  .jumbotron-title {
+    font-size: 2.75rem;
+  }
+
+  .jumbotron-text {
+    font-size: 1rem;
+    max-width: 100%;
+  }
+
+  .jumbotron-buttons {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .btn-primary-hero,
+  .btn-secondary-hero {
+    width: 100%;
+    justify-content: center;
+    padding: 1rem 1.5rem;
+  }
+
+  .jumbotron-stats {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    text-align: center;
+  }
+
+  .stat-item h3 {
+    font-size: 2rem;
+  }
+
+  .stat-item p {
+    font-size: 0.85rem;
+  }
+
+  .jumbotron-image img {
+    max-height: 400px;
+  }
+}
