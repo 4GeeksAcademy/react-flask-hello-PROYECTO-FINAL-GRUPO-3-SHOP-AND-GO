@@ -1,40 +1,38 @@
-export const initialStore = () => {
-  return {
-    // ✅ token se inicializa desde sessionStorage para que no se pierda al recargar
-    token: sessionStorage.getItem("token") || null,
-    user: null,
+export const initialStore=()=>{
+  return{
+    message: null,
+    todos: [
+      {
+        id: 1,
+        title: "Make the bed",
+        background: null,
+      },
+      {
+        id: 2,
+        title: "Do my homework",
+        background: null,
+      }
+    ]
   }
 }
 
 export default function storeReducer(store, action = {}) {
-  switch (action.type) {
-
-    // ✅ guarda el token y el usuario al hacer login
-    case 'login':
-      sessionStorage.setItem("token", action.payload.token);
+  switch(action.type){
+    case 'set_hello':
       return {
         ...store,
-        token: action.payload.token,
-        user: action.payload.user
+        message: action.payload
       };
+      
+    case 'add_task':
 
-    // ✅ limpia el token y el usuario al cerrar sesión
-    case 'logout':
-      sessionStorage.removeItem("token");
+      const { id,  color } = action.payload
+
       return {
         ...store,
-        token: null,
-        user: null
+        todos: store.todos.map((todo) => (todo.id === id ? { ...todo, background: color } : todo))
       };
-
-    // ✅ actualiza los datos del usuario sin cambiar el token
-    case 'set_user':
-      return {
-        ...store,
-        user: action.payload
-      };
-
     default:
-      throw Error('Unknown action: ' + action.type);
-  }
+      throw Error('Unknown action.');
+  }    
 }
