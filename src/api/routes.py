@@ -2,22 +2,17 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 from flask import Flask, request, jsonify, url_for, Blueprint
-from api.models import db, User, Address, UserRole, Store, Order, OrderStatus, Payment, PaymentStatus
+from api.models import db, User, Address, UserRole, Store, Order, OrderStatus
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from sqlalchemy import select
-from api.utils import geoapify_forward_geocode
-import requests 
-import stripe
-import os
+import random
 
 api = Blueprint('api', __name__)
 
 # Allow CORS requests to this API
 CORS(api)
-
-VALID_ROLES = ["user","driver","admin"] #se ve más profesional en MAYUS
 
 
 #REGISTER
@@ -33,7 +28,8 @@ def register():
     password = data.get("password")
     role = data.get ("role", "user")
 
-    if role not in VALID_ROLES:
+    valid_roles = [r.value for r in UserRole]
+    if role not in valid_roles:
         return jsonify({"error": "Invalid role"}), 400
 
     if not name or not email or not password or phone is None:
@@ -62,7 +58,6 @@ def register():
 # =========================
 # USER CRUD
 # =========================
-
 
 @api.route('/users', methods=['GET'])
 @jwt_required()
@@ -105,7 +100,6 @@ def get_user(user_id):
     return jsonify(user.serialize()), 200
 
 
-
 @api.route('/users/<int:user_id>', methods=['PUT'])
 @jwt_required()
 def update_user(user_id):
@@ -136,7 +130,7 @@ def update_user(user_id):
         user.phone = data["phone"]
 
     if "password" in data:
-        user.set_password(data["password"])  # hashea la nueva contraseña
+        user.set_password(data["password"])  
 
     # solo el admin puede cambiar el rol
     if "role" in data:
@@ -153,7 +147,6 @@ def update_user(user_id):
         "msg": "User updated successfully",
         "user": user.serialize()
     }), 200
-
 
 # ── DELETE USER (dueño o admin) ────────────────────────────────
 @api.route('/users/<int:user_id>', methods=['DELETE'])
@@ -180,7 +173,6 @@ def delete_user(user_id):
     db.session.commit()
 
     return jsonify({"msg": "User deleted successfully"}), 200
-
 
 #LOGIN
 @api.route('/login', methods = ['POST'])
@@ -217,8 +209,8 @@ def new_address():
 
     if not street or not city or not postal_code:
         return jsonify({"error": "street, city and postal_code are required"}), 400
-
-    user_id = int(get_jwt_identity())
+    
+    user_id = get_jwt_identity()
 
     user = db.session.execute(
         select(User).where(User.id == user_id)
@@ -269,10 +261,11 @@ def new_address():
 @api.route("/addresses", methods=["GET"])
 @jwt_required()
 def get_addresses():
-    user_id = get_jwt_identity()
+   
+    user_id = int(get_jwt_identity())
 
     addresses = db.session.execute(
-        select(Address).where(Address.user_id == int(user_id))
+        select(Address).where(Address.user_id == user_id)
     ).scalars().all()
 
     return jsonify([a.serialize() for a in addresses]), 200
@@ -394,6 +387,74 @@ def delete_address(address_id):
 
     return jsonify([s.serialize() for s in stores]), 200
 
+# ── PUT UPDATE STORE (solo admin) ─────────────────────────────
+@api.route('/stores/<int:store_id>', methods=['PUT'])
+@jwt_required()
+def update_store(store_id):
+    user_id = int(get_jwt_identity())
+
+    current_user = db.session.execute(
+        select(User).where(User.id == user_id)
+    ).scalar_one_or_none()
+
+    # solo el admin puede editar tiendas
+    if current_user is None or current_user.role != UserRole.admin:
+        return jsonify({"error": "Forbidden, admin only"}), 403
+
+    store = db.session.execute(
+        select(Store).where(Store.id == store_id)
+    ).scalar_one_or_none()
+
+    if store is None:
+        return jsonify({"error": "Store not found"}), 404
+
+    data = request.get_json() or {}
+
+    # solo se actualizan los campos que lleguen
+    if "name" in data:
+        store.name = data["name"]
+
+    if "qr_code" in data:
+        store.qr_code = data["qr_code"]
+
+    if "is_active" in data:
+        store.is_active = data["is_active"]
+
+    db.session.commit()
+
+    return jsonify({
+        "msg": "Store updated successfully",
+        "store": store.serialize()
+    }), 200
+
+# ── DELETE STORE (solo admin) ──────────────────────────────────
+@api.route('/stores/<int:store_id>', methods=['DELETE'])
+@jwt_required()
+def delete_store(store_id):
+    user_id = int(get_jwt_identity())
+
+    current_user = db.session.execute(
+        select(User).where(User.id == user_id)
+    ).scalar_one_or_none()
+
+    # solo el admin puede eliminar tiendas
+    if current_user is None or current_user.role != UserRole.admin:
+        return jsonify({"error": "Forbidden, admin only"}), 403
+
+    store = db.session.execute(
+        select(Store).where(Store.id == store_id)
+    ).scalar_one_or_none()
+
+    if store is None:
+        return jsonify({"error": "Store not found"}), 404
+
+    # en vez de borrar físicamente, desactivamos la tienda
+    # así no se pierden los pedidos asociados a ella
+    store.is_active = False
+    db.session.commit()
+
+    return jsonify({"msg": "Store deactivated successfully"}), 200
+
 
 @api.route('/orders', methods=['POST'])
 @jwt_required()
@@ -406,7 +467,7 @@ def create_order():
     notes        = data.get("notes")
 
     amount_cents = data.get("amount_cents")
-    git_id     = data.get("store_id")
+    store_id     = data.get("store_id")
     address_id   = data.get("address_id")
 
     if not amount_cents or not store_id or not address_id:
@@ -438,7 +499,20 @@ def create_order():
     if address.user_id != user_id:
         return jsonify({"error": "This address does not belong to you"}), 403
    
-    # ── CREAR EL PEDIDO ────────────────────────────────────────
+    # ── ASIGNAR DRIVER ALEATORIO ───────────────────────────────
+
+    available_drivers = db.session.execute(
+        select(User).where(
+            User.role == UserRole.driver,
+            User.is_available == True
+        )
+    ).scalars().all()
+
+    # si hay drivers disponibles elegimos uno al azar
+    assigned_driver = None
+    if available_drivers:
+        assigned_driver = random.choice(available_drivers)
+        assigned_driver.is_available = False  
 
     try:
         new_order = Order(
@@ -449,7 +523,8 @@ def create_order():
                                          
             user_id=user_id,             
             store_id=store_id,           
-            address_id=address_id        
+            address_id=address_id,
+            driver_id=assigned_driver.id if assigned_driver else None
            
         )
 
@@ -459,7 +534,8 @@ def create_order():
 
         return jsonify({
             "msg": "Order created successfully",
-            "order": new_order.serialize()  
+            "order": new_order.serialize(),
+            "driver_assigned": assigned_driver.name if assigned_driver else "No drivers available"
         }), 201
         
 
@@ -535,15 +611,13 @@ def create_payment():
         db.session.rollback()
         return jsonify({"error": f"Stripe error: {str(e)}"}), 502
 
-    except Exception as e:
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
 
-
-# ── GET ALL PAYMENTS ───────────────────────────────────────────
-@api.route('/payments', methods=['GET'])
+@api.route('/orders', methods=['GET'])
 @jwt_required()
-def get_payments():
+def get_orders():
+ 
     user_id = int(get_jwt_identity())
 
     current_user = db.session.execute(
@@ -553,115 +627,130 @@ def get_payments():
     if current_user is None:
         return jsonify({"error": "User not found"}), 404
 
-    # admin ve todos los pagos
     if current_user.role == UserRole.admin:
-        payments = db.session.execute(
-            select(Payment)
+        orders = db.session.execute(
+            select(Order)  
         ).scalars().all()
 
-    # usuario normal solo ve los pagos de sus pedidos
+    # si es DRIVER solo ve los pedidos que tiene asignados, por su id
+    
+    elif current_user.role == UserRole.driver:
+        orders = db.session.execute(
+            select(Order).where(Order.driver_id == user_id)
+        ).scalars().all()
+
     else:
-        payments = db.session.execute(
-            select(Payment).join(Order).where(Order.user_id == user_id)
+        orders = db.session.execute(
+            select(Order).where(Order.user_id == user_id)
         ).scalars().all()
 
-    return jsonify([p.serialize() for p in payments]), 200
+    return jsonify([order.serialize() for order in orders]), 200
 
-
-# ── GET ONE PAYMENT ────────────────────────────────────────────
-@api.route('/payments/<int:payment_id>', methods=['GET'])
+@api.route('/orders/<int:order_id>', methods=['GET'])
 @jwt_required()
-def get_payment(payment_id):
+def get_order(order_id):
+
     user_id = int(get_jwt_identity())
 
     current_user = db.session.execute(
         select(User).where(User.id == user_id)
     ).scalar_one_or_none()
 
-    payment = db.session.execute(
-        select(Payment).where(Payment.id == payment_id)
+    order = db.session.execute(
+        select(Order).where(Order.id == order_id)
     ).scalar_one_or_none()
 
-    if payment is None:
-        return jsonify({"error": "Payment not found"}), 404
+    if order is None:
+        return jsonify({"error": "Order not found"}), 404
 
-    # solo el dueño del pedido o un admin pueden ver el pago
-    if payment.order.user_id != user_id and current_user.role != UserRole.admin:
+    if (order.user_id != user_id and
+        order.driver_id != user_id and
+        current_user.role != UserRole.admin):
         return jsonify({"error": "Forbidden"}), 403
 
-    return jsonify(payment.serialize()), 200
+    return jsonify(order.serialize()), 200
 
-
-# ── PUT UPDATE PAYMENT (webhook de Stripe o admin) ─────────────
-@api.route('/payments/<int:payment_id>', methods=['PUT'])
+@api.route('/orders/<int:order_id>', methods=['PUT'])
 @jwt_required()
-def update_payment(payment_id):
+def update_order(order_id):
+
     user_id = int(get_jwt_identity())
-
-    current_user = db.session.execute(
-        select(User).where(User.id == user_id)
-    ).scalar_one_or_none()
-
-    # solo el admin puede actualizar el estado del pago manualmente
-    if current_user is None or current_user.role != UserRole.admin:
-        return jsonify({"error": "Forbidden, admin only"}), 403
-
-    payment = db.session.execute(
-        select(Payment).where(Payment.id == payment_id)
-    ).scalar_one_or_none()
-
-    if payment is None:
-        return jsonify({"error": "Payment not found"}), 404
 
     data = request.get_json() or {}
 
+    # buscamos al usuario completo en la BD
+    # lo necesitamos para verificar su rol
+    current_user = db.session.execute(
+        select(User).where(User.id == user_id)
+    ).scalar_one_or_none()
+
+    order = db.session.execute(
+        select(Order).where(Order.id == order_id)
+    ).scalar_one_or_none()
+
+   
+    if order is None:
+        return jsonify({"error": "Order not found"}), 404
+
+    # ── VERIFICAR PERMISOS GENERALES ───────────────────────────
+
+    if (order.user_id != user_id and
+        order.driver_id != user_id and
+        current_user.role != UserRole.admin):
+        return jsonify({"error": "Forbidden"}), 403
+
+    # ── ACTUALIZAR STATUS ──────────────────────────────────────
+
     if "status" in data:
-        valid_statuses = [s.value for s in PaymentStatus]
-        if data["status"] not in valid_statuses:
+        new_status = data["status"]
+
+        # ["pending", "accepted", "in_transit", "delivered", "cancelled"]
+        valid_statuses = [s.value for s in OrderStatus]
+
+        # si el status que mandó el cliente no existe en el Enum → 400
+        if new_status not in valid_statuses:
             return jsonify({"error": f"Invalid status. Valid statuses: {valid_statuses}"}), 400
 
-        payment.status = PaymentStatus(data["status"])
+        if current_user.role == UserRole.user and new_status != "cancelled":
+            return jsonify({"error": "Users can only cancel orders"}), 403
 
-        # si el pago se marca como pagado, actualizamos el pedido a accepted
-        if data["status"] == "paid":
-            payment.order.status = OrderStatus.accepted
+        # convertimos el string "cancelled" al Enum OrderStatus.cancelled
+        order.status = OrderStatus(new_status)
+
+        # si el pedido se entrega o cancela, el driver vuelve a estar disponible
+        if new_status in ["delivered", "cancelled"] and order.driver_id:
+            driver = db.session.execute(
+                select(User).where(User.id == order.driver_id)
+            ).scalar_one_or_none()
+            if driver:
+                driver.is_available = True
+
+    # ── ACTUALIZAR DRIVER ──────────────────────────────────────
+
+    # solo el admin puede asignar o cambiar el driver de un pedido
+    if "driver_id" in data:
+        if current_user.role != UserRole.admin:
+            return jsonify({"error": "Only admin can assign drivers"}), 403
+
+        # asignamos el nuevo driver al pedido
+        order.driver_id = data["driver_id"]
+
+
+    # si ya fue aceptado o está en tránsito no tiene sentido cambiarlas
+    if "notes" in data:
+        if order.status != OrderStatus.pending:
+            return jsonify({"error": "Cannot edit notes after order is accepted"}), 400
+        order.notes = data["notes"]
+
+    # si el pedido ya fue aceptado el número de bolsas no puede cambiar
+    if "bags_count" in data:
+        if order.status != OrderStatus.pending:
+            return jsonify({"error": "Cannot edit bags_count after order is accepted"}), 400
+        order.bags_count = data["bags_count"]
 
     db.session.commit()
 
     return jsonify({
-        "msg": "Payment updated successfully",
-        "payment": payment.serialize()
+        "msg": "Order updated successfully",
+        "order": order.serialize()
     }), 200
-
-
-# ── DELETE PAYMENT (solo admin) ────────────────────────────────
-@api.route('/payments/<int:payment_id>', methods=['DELETE'])
-@jwt_required()
-def delete_payment(payment_id):
-    user_id = int(get_jwt_identity())
-
-    current_user = db.session.execute(
-        select(User).where(User.id == user_id)
-    ).scalar_one_or_none()
-
-    if current_user is None or current_user.role != UserRole.admin:
-        return jsonify({"error": "Forbidden, admin only"}), 403
-
-    payment = db.session.execute(
-        select(Payment).where(Payment.id == payment_id)
-    ).scalar_one_or_none()
-
-    if payment is None:
-        return jsonify({"error": "Payment not found"}), 404
-
-    # cancelamos el Payment Intent en Stripe antes de borrar
-    try:
-        stripe.PaymentIntent.cancel(payment.stripe_session_id)
-    except stripe.error.StripeError as e:
-        return jsonify({"error": f"Stripe error: {str(e)}"}), 502
-
-    db.session.delete(payment)
-    db.session.commit()
-
-    return jsonify({"msg": "Payment deleted successfully"}), 200
-       
