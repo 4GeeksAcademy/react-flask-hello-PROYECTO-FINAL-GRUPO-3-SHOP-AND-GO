@@ -470,10 +470,6 @@ def create_order():
         return jsonify({"error": str(e)}), 500
     
 
-
-import stripe
-import os
-
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 
 # ── POST CREATE PAYMENT (usuario autenticado) ──────────────────
