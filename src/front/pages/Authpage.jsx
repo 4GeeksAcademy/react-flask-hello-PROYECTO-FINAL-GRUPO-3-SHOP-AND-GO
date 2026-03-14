@@ -3,15 +3,17 @@ import { Link } from "react-router-dom";
 import useGlobalReducer from "../hooks/useGlobalReducer";  // Custom hook for accessing the global state.
 import { useNavigate } from "react-router-dom"
 import { useState } from "react";
-
+import { register, login } from "../Services/authService";
 
 export const Authpage = () => {
     // Access the global state and dispatch function using the useGlobalReducer hook.
     //   const { store, dispatch } = useGlobalReducer()
-    //   const navigate = useNavigate();
+    const navigate = useNavigate();
 
     const [newUser, setNewUser] = useState({
+        name: "",
         email: "",
+        phone: "",
         password: "",
         confirmPassword: "", //esto como las webs normales que validan dobles webs...
 
@@ -45,7 +47,7 @@ export const Authpage = () => {
         e.preventDefault()  //esto evita que se recargue la pagina y, mis datos puedan enviarse al backend y 
         //que tampoco se muestren en la URL
         //para validaciones
-        if (!newUser.email || !newUser.password || !newUser.confirmPassword) {
+        if (!newUser.name || !newUser.email || !newUser.phone || !newUser.password || !newUser.confirmPassword) {
             alert("All fields are required")
             return;
         }
@@ -56,10 +58,7 @@ export const Authpage = () => {
         }
 
         //llamo a mi función en el BACKEND
-        register({
-            email: newUser.email,
-            password: newUser.password
-        }, navigate);
+        register(newUser, navigate);
     };
 
     const handleLoginSubmit = (e) => {
@@ -72,10 +71,8 @@ export const Authpage = () => {
             return;
         }
 
-        //AQUI LLAMO A LA FUNCIÓN LOGIN DEL BACKEND, PONDRÉ SÓLO UNA PRUEBA
-        console.log("login con:", loginUser);
-        alert("Logueado! Email: " + loginUser.email);
-        //pdte conectar el BACKEND
+        login(loginUser, navigate);
+
     };
 
 
@@ -126,6 +123,19 @@ export const Authpage = () => {
                         <h1>CREAR CUENTA 🚀</h1>
 
                         <form onSubmit={handleSubmit}>
+
+                            {/* NOMBRE */}
+
+                            <input
+                                type="text"
+                                name="name"
+                                placeholder="Nombre completo"
+                                value={newUser.name}
+                                onChange={handleChange}
+                            />
+
+                            {/* EMAIL */}
+
                             <input
                                 type="email"
                                 name="email"
@@ -134,6 +144,17 @@ export const Authpage = () => {
                                 onChange={handleChange}
                             />
 
+                            {/* PHONE */}
+
+                            <input
+                                type="tel"
+                                name="phone"
+                                placeholder="Teléfono"
+                                value={newUser.phone}
+                                onChange={handleChange}
+                            />
+                            {/* PASSWORD */}
+
                             <input
                                 type="password"
                                 name="password"
@@ -141,6 +162,7 @@ export const Authpage = () => {
                                 value={newUser.password}
                                 onChange={handleChange}
                             />
+                            {/* CONFIRM PASSWORD */}
 
                             <input
                                 type="password"

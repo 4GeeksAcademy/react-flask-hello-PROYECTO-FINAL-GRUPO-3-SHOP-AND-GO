@@ -23,7 +23,7 @@ export const register = async (newUser, navigate) => {
     localStorage.setItem("token", data.token);
     
     // Navegar a home
-    navigate("/");
+    navigate("/login");
 };
 
 //========================================
@@ -49,7 +49,7 @@ export const login = async (user, navigate) => {
     localStorage.setItem("token", data.token);
     
     // Navegar a home
-    navigate("/");
+    navigate("/profile");
 };
 
 //========================================
