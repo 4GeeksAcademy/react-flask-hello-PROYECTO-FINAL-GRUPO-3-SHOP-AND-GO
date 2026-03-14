@@ -54,8 +54,8 @@
 
 .join-btn {
   padding: 1rem 3rem;
-  background: #FDE047;
-  color: #7C3AED;
+   background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 50%, #6D28D9 100%) !important;
+  color: white;
   border: none;
   border-radius: 50px;
   font-size: 1.1rem;
