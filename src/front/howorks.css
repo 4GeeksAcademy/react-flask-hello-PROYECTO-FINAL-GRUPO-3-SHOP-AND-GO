@@ -1,0 +1,109 @@
+/* ============================================
+   PÁGINA COMPLETA
+   ============================================ */
+.howorks-page {
+  min-height: 100vh;
+}
+
+/* ============================================
+   HERO MORADO
+   ============================================ */
+.howorks-hero {
+  background: linear-gradient(135deg, #A855F7 0%, #9333EA 30%, #EC4899 70%, #F97316 100%);
+  padding: 4rem 2rem;
+  text-align: center;
+  color: white;
+}
+
+.howorks-hero-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin-bottom: 1rem;
+}
+
+.howorks-hero-title .highlight {
+  color: #FDE047;
+}
+
+.howorks-hero-subtitle {
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+  opacity: 0.9;
+}
+
+.howorks-hero-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn-primary {
+  padding: 1rem 2rem;
+  background: white;
+  color: #7C3AED;
+  border: none;
+  border-radius: 50px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.btn-primary:hover {
+  transform: scale(1.05);
+}
+
+.btn-secondary {
+  padding: 1rem 2rem;
+  background: transparent;
+  color: white;
+  border: 2px solid white;
+  border-radius: 50px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+  background: white;
+  color: #7C3AED;
+}
+
+/* ============================================
+   SECCIÓN DE PASOS
+   ============================================ */
+.howorks-steps {
+  padding: 4rem 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.step {
+  margin-bottom: 3rem;
+}
+
+.step h2 {
+  font-size: 2rem;
+  color: #7C3AED;
+  margin-bottom: 1rem;
+  font-weight: 700;
+}
+
+.step p {
+  color: #666;
+  font-size: 1.1rem;
+  line-height: 1.6;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 768px) {
+  .howorks-hero-title {
+    font-size: 2rem;
+  }
+
+  .step h2 {
+    font-size: 1.5rem;
+  }
+}

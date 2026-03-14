@@ -1,6 +1,6 @@
 from flask import jsonify, url_for
 import os
-import requests
+import requests, math
 print("API KEY:", os.getenv("GEOAPIFY_API_KEY"))
 class APIException(Exception):
     status_code = 400
@@ -74,3 +74,37 @@ def geoapify_forward_geocode(street, city, postal_code):
         "lon": first.get("lon"),
         "formatted": first.get("formatted")
     }
+
+def calculate_distance(lat1, lon1, lat2, lon2):
+    R = 6371  
+
+    dlat = math.radians(lat2 - lat1)
+    dlon = math.radians(lon2 - lon1)
+
+    a = (
+        math.sin(dlat / 2) ** 2
+        + math.cos(math.radians(lat1))
+        * math.cos(math.radians(lat2))
+        * math.sin(dlon / 2) ** 2
+    )
+
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+
+    return R * c
+
+
+def calculate_order_price(distance_km, bags_count):
+    base_price = 3.0
+    price_per_km = 1.2
+    price_per_bag = 0.5
+    minimum_price = 4.0
+
+    total_price = (
+        base_price
+        + (distance_km * price_per_km)
+        + (bags_count * price_per_bag)
+    )
+
+    final_price = max(total_price, minimum_price)
+
+    return round(final_price, 2)

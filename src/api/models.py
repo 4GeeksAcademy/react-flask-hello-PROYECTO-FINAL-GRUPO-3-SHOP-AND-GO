@@ -101,6 +101,11 @@ class Store(db.Model):
     name: Mapped[str] = mapped_column(String(120), nullable=False)
     qr_code: Mapped[str] = mapped_column(String(120), unique=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    street: Mapped[str] = mapped_column(String(200), nullable=False)
+    city: Mapped[str] = mapped_column(String(100), nullable=False)
+    postal_code: Mapped[str] = mapped_column(String(10), nullable=False)
+    latitude: Mapped[float] = mapped_column(Float, nullable=True)
+    longitude: Mapped[float] = mapped_column(Float, nullable=True)
 
     orders: Mapped[list["Order"]] = relationship(back_populates="store")
 
@@ -109,7 +114,12 @@ class Store(db.Model):
             "id": self.id,
             "name": self.name,
             "is_active": self.is_active,
-            "qr_code": self.qr_code
+            "qr_code": self.qr_code,
+            "street": self.street,
+            "city": self.city,
+            "postal_code": self.postal_code,
+            "latitude": self.latitude,
+            "longitude": self.longitude
         }
 
 # -----------------------------------

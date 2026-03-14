@@ -1,0 +1,79 @@
+/* ============================================
+   PÁGINA DE AYUDA
+   ============================================ */
+.help-page {
+  background: linear-gradient(135deg, #A855F7 0%, #9333EA 30%, #EC4899 70%, #F97316 100%);
+  min-height: 100vh;
+  padding: 4rem 2rem;
+  color: white;
+  text-align: center;
+}
+
+.help-title {
+  font-size: 2.5rem;
+  color: white;
+  text-align: center;
+  margin-bottom: 3rem;
+  font-weight: 800;
+}
+
+/* ============================================
+   SECCIONES
+   ============================================ */
+.help-section {
+  margin-bottom: 3rem;
+}
+
+.help-subtitle {
+  font-size: 1.5rem;
+  color: white;
+  margin-bottom: 1rem;
+  font-weight: 700;
+}
+
+.help-text {
+  color: white;
+  font-size: 1.1rem;
+}
+
+/* ============================================
+   FAQ
+   ============================================ */
+.faq-item {
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.faq-item:last-child {
+  border-bottom: none;
+}
+
+.faq-question {
+  font-weight: 700;
+  color: white
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
+.faq-answer {
+  color: white;
+  line-height: 1.6;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 768px) {
+  .help-page {
+    padding: 2rem 1rem;
+  }
+
+  .help-title {
+    font-size: 2rem;
+  }
+
+  .help-subtitle {
+    font-size: 1.3rem;
+  }
+}

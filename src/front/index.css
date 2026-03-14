@@ -1,0 +1,106 @@
+/* Navbar principal - FONDO BLANCO */
+.navbar-custom {
+  background-color: #FFFFFF !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  padding: 0.75rem 0;
+}
+
+/* Container */
+.navbar-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Logo */
+.navbar-logo span {
+  background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+}
+
+/* Links container */
+.navbar-links {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  margin-left: auto;
+}
+
+/* Links individuales */
+.navbar-links .nav-link {
+  color: #374151 !important; /* Gris oscuro */
+  font-size: 1rem;
+  font-weight: 500;
+  transition: color 0.3s ease;
+  text-decoration: none;
+}
+
+.navbar-links .nav-link:hover {
+  color: #8B5CF6 !important; /* Morado al hover */
+}
+
+/* Botón registrarse CON DEGRADADO */
+.btn-register {
+  background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 50%, #6D28D9 100%) !important;
+  color: white;
+  padding: 0.625rem 1.75rem !important;
+  border-radius: 50px !important;
+  font-weight: 600 !important;
+  border: none !important;
+  box-shadow: 0 4px 14px rgba(139, 92, 246, 0.4);
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+
+.btn-register:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(139, 92, 246, 0.6);
+  background: linear-gradient(135deg, #9333EA 0%, #8B5CF6 50%, #7C3AED 100%) !important;
+}
+
+/* Botón hamburguesa */
+.navbar-toggler {
+  border: 2px solid #8B5CF6;
+  padding: 0.5rem;
+}
+
+.navbar-toggler-icon {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(139, 92, 246, 1)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+
+/* Responsive */
+@media (max-width: 767px) {
+  .navbar-collapse {
+    background-color: #FFFFFF;
+    margin-top: 1rem;
+    padding: 1rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+  
+  .navbar-links {
+    flex-direction: column;
+    gap: 0.75rem;
+    width: 100%;
+  }
+  
+  .navbar-links .nav-link {
+    width: 100%;
+    text-align: center;
+    padding: 0.75rem 0;
+  }
+  
+  .btn-register {
+    width: 100%;
+    text-align: center;
+    margin-top: 0.5rem;
+  }
+}
