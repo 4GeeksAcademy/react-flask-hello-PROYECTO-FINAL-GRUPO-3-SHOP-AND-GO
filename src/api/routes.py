@@ -2,12 +2,14 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 from flask import Flask, request, jsonify, url_for, Blueprint
-from api.models import db, User, Address, UserRole, Store, Order, OrderStatus
+from api.models import db, User, Address, UserRole, Store, Order, OrderStatus,Payment, PaymentStatus
 from api.utils import generate_sitemap, APIException, calculate_distance, calculate_order_price,geoapify_forward_geocode
 from flask_cors import CORS
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from sqlalchemy import select
 import random, requests
+import stripe
+import os
 
 api = Blueprint('api', __name__)
 
@@ -968,3 +970,242 @@ def delete_store(store_id):
             "error": "Internal server error",
             "details": str(e)
         }), 500
+    
+import stripe
+import os
+
+stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
+
+# ── POST CREATE PAYMENT (usuario autenticado) ──────────────────
+@api.route('/payments', methods=['POST'])
+@jwt_required()
+def create_payment():
+    user_id = int(get_jwt_identity())
+    data = request.get_json() or {}
+
+    order_id = data.get("order_id")
+    currency = data.get("currency", "eur")
+
+    if not order_id:
+        return jsonify({"error": "order_id is required"}), 400
+
+    # verificar que el pedido existe
+    order = db.session.execute(
+        select(Order).where(Order.id == order_id)
+    ).scalar_one_or_none()
+
+    if order is None:
+        return jsonify({"error": "Order not found"}), 404
+
+    # solo el dueño del pedido puede pagar
+    if order.user_id != user_id:
+        return jsonify({"error": "Forbidden"}), 403
+
+    # verificar que el pedido no tiene ya un pago
+    existing_payment = db.session.execute(
+        select(Payment).where(Payment.order_id == order_id)
+    ).scalar_one_or_none()
+
+    if existing_payment:
+        return jsonify({"error": "This order already has a payment"}), 409
+
+    try:
+        # crear el Payment Intent en Stripe
+        intent = stripe.PaymentIntent.create(
+            amount=order.amount_cents,
+            currency=currency,
+            metadata={"order_id": order_id}
+        )
+
+        # guardar el pago en nuestra BD
+        new_payment = Payment(
+            amount_cents=order.amount_cents,
+            currency=currency,
+            status=PaymentStatus.pending,
+            stripe_session_id=intent["id"],
+            order_id=order_id
+        )
+
+        db.session.add(new_payment)
+        db.session.commit()
+
+        return jsonify({
+            "msg": "Payment created successfully",
+            "client_secret": intent["client_secret"],
+            "payment": new_payment.serialize()
+        }), 201
+
+    except stripe.error.StripeError as e:
+        db.session.rollback()
+        return jsonify({"error": f"Stripe error: {str(e)}"}), 502
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+
+
+# ── GET ALL PAYMENTS ───────────────────────────────────────────
+@api.route('/payments', methods=['GET'])
+@jwt_required()
+def get_payments():
+    user_id = int(get_jwt_identity())
+
+    current_user = db.session.execute(
+        select(User).where(User.id == user_id)
+    ).scalar_one_or_none()
+
+    if current_user is None:
+        return jsonify({"error": "User not found"}), 404
+
+    # admin ve todos los pagos
+    if current_user.role == UserRole.admin:
+        payments = db.session.execute(
+            select(Payment)
+        ).scalars().all()
+
+    # usuario normal solo ve los pagos de sus pedidos
+    else:
+        payments = db.session.execute(
+            select(Payment).join(Order).where(Order.user_id == user_id)
+        ).scalars().all()
+
+    return jsonify([p.serialize() for p in payments]), 200
+
+
+# ── GET ONE PAYMENT ────────────────────────────────────────────
+@api.route('/payments/<int:payment_id>', methods=['GET'])
+@jwt_required()
+def get_payment(payment_id):
+    user_id = int(get_jwt_identity())
+
+    current_user = db.session.execute(
+        select(User).where(User.id == user_id)
+    ).scalar_one_or_none()
+
+    payment = db.session.execute(
+        select(Payment).where(Payment.id == payment_id)
+    ).scalar_one_or_none()
+
+    if payment is None:
+        return jsonify({"error": "Payment not found"}), 404
+
+    # solo el dueño del pedido o un admin pueden ver el pago
+    if payment.order.user_id != user_id and current_user.role != UserRole.admin:
+        return jsonify({"error": "Forbidden"}), 403
+
+    return jsonify(payment.serialize()), 200
+
+
+# ── PUT UPDATE PAYMENT (solo admin) ───────────────────────────
+@api.route('/payments/<int:payment_id>', methods=['PUT'])
+@jwt_required()
+def update_payment(payment_id):
+    user_id = int(get_jwt_identity())
+
+    current_user = db.session.execute(
+        select(User).where(User.id == user_id)
+    ).scalar_one_or_none()
+
+    if current_user is None or current_user.role != UserRole.admin:
+        return jsonify({"error": "Forbidden, admin only"}), 403
+
+    payment = db.session.execute(
+        select(Payment).where(Payment.id == payment_id)
+    ).scalar_one_or_none()
+
+    if payment is None:
+        return jsonify({"error": "Payment not found"}), 404
+
+    data = request.get_json() or {}
+
+    if "status" in data:
+        valid_statuses = [s.value for s in PaymentStatus]
+        if data["status"] not in valid_statuses:
+            return jsonify({"error": f"Invalid status. Valid statuses: {valid_statuses}"}), 400
+
+        payment.status = PaymentStatus(data["status"])
+
+        # si el pago se marca como pagado actualizamos el pedido a accepted
+        if data["status"] == "paid":
+            payment.order.status = OrderStatus.accepted
+
+    db.session.commit()
+
+    return jsonify({
+        "msg": "Payment updated successfully",
+        "payment": payment.serialize()
+    }), 200
+
+
+# ── DELETE PAYMENT (solo admin) ────────────────────────────────
+@api.route('/payments/<int:payment_id>', methods=['DELETE'])
+@jwt_required()
+def delete_payment(payment_id):
+    user_id = int(get_jwt_identity())
+
+    current_user = db.session.execute(
+        select(User).where(User.id == user_id)
+    ).scalar_one_or_none()
+
+    if current_user is None or current_user.role != UserRole.admin:
+        return jsonify({"error": "Forbidden, admin only"}), 403
+
+    payment = db.session.execute(
+        select(Payment).where(Payment.id == payment_id)
+    ).scalar_one_or_none()
+
+    if payment is None:
+        return jsonify({"error": "Payment not found"}), 404
+
+    # cancelamos el Payment Intent en Stripe antes de borrar
+    try:
+        stripe.PaymentIntent.cancel(payment.stripe_session_id)
+    except stripe.error.StripeError as e:
+        return jsonify({"error": f"Stripe error: {str(e)}"}), 502
+
+    db.session.delete(payment)
+    db.session.commit()
+
+    return jsonify({"msg": "Payment deleted successfully"}), 200
+
+
+# ── WEBHOOK DE STRIPE ──────────────────────────────────────────
+@api.route('/webhook', methods=['POST'])
+def stripe_webhook():
+    payload = request.get_data()
+    sig_header = request.headers.get('Stripe-Signature')
+    webhook_secret = os.getenv("STRIPE_WEBHOOK_SECRET")
+
+    try:
+        event = stripe.Webhook.construct_event(
+            payload, sig_header, webhook_secret
+        )
+    except ValueError:
+        return jsonify({"error": "Invalid payload"}), 400
+    except stripe.error.SignatureVerificationError:
+        return jsonify({"error": "Invalid signature"}), 400
+
+    # pago completado
+    if event["type"] == "payment_intent.succeeded":
+        intent = event["data"]["object"]
+        payment = db.session.execute(
+            select(Payment).where(Payment.stripe_session_id == intent["id"])
+        ).scalar_one_or_none()
+
+        if payment:
+            payment.status = PaymentStatus.paid
+            payment.order.status = OrderStatus.accepted
+            db.session.commit()
+
+    # pago fallido
+    if event["type"] == "payment_intent.payment_failed":
+        intent = event["data"]["object"]
+        payment = db.session.execute(
+            select(Payment).where(Payment.stripe_session_id == intent["id"])
+        ).scalar_one_or_none()
+
+        if payment:
+            payment.status = PaymentStatus.failed
+            db.session.commit()
+
+    return jsonify({"msg": "Webhook received"}), 200
