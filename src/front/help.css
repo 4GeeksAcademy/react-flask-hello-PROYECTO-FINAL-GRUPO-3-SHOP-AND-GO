@@ -2,7 +2,7 @@
    PÁGINA DE AYUDA
    ============================================ */
 .help-page {
-  background: linear-gradient(135deg, #A855F7 0%, #9333EA 30%, #EC4899 70%, #F97316 100%);
+  background: linear-gradient(135deg, #A855F7 0%, #9333EA 30%, #7C3AED 60%, #6D28D9 100%);
   min-height: 100vh;
   padding: 4rem 2rem;
   color: white;
@@ -51,7 +51,7 @@
 
 .faq-question {
   font-weight: 700;
-  color: white
+  color: white;
   font-size: 1.1rem;
   margin-bottom: 0.5rem;
 }
