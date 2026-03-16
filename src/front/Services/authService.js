@@ -49,7 +49,7 @@ export const login = async (user, navigate) => {
     localStorage.setItem("token", data.token);
     
     // Navegar a home
-    navigate("/profile");
+    navigate("/Profileuser");
 };
 
 //========================================
@@ -64,4 +64,31 @@ export const logout = () => {
 //========================================
 export const getToken = () => {
     return localStorage.getItem("token");
+};
+
+//========================================
+//GET PROFILE
+//========================================
+export const getProfile = async () => {
+  const token = getToken();
+  
+  if (!token) {
+    throw new Error("No token found");
+  }
+
+  const response = await fetch(`${API_URL}/api/profile`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`
+    }
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error || "Error al obtener perfil");
+  }
+
+  return data;
 };
