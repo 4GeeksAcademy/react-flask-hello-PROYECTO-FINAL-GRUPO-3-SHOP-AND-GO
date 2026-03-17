@@ -1,0 +1,210 @@
+.hacerpedido-layout {
+    display: grid;
+    grid-template-columns: 280px 1fr 320px;
+    gap: 24px;
+    padding: 32px;
+    max-width: 1400px;
+    margin: 0 auto;
+    align-items: start;
+}
+
+.stores-sidebar,
+.pedido-main,
+.pedido-summary {
+    background: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.stores-sidebar {
+    padding: 20px;
+    max-height: 80vh;
+    overflow-y: auto;
+    position: sticky;
+    top: 20px;
+}
+
+.stores-sidebar h3 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 18px;
+    color: #6f2cff;
+}
+
+.store-item {
+    padding: 14px 16px;
+    border: 1px solid #e9e9ef;
+    border-radius: 14px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: #fafafa;
+}
+
+.store-item:hover {
+    border-color: #8c52ff;
+    transform: translateY(-1px);
+}
+
+.store-item.active {
+    border: 2px solid #8c52ff;
+    background: #f6efff;
+    box-shadow: 0 8px 20px rgba(140, 82, 255, 0.15);
+}
+
+.store-item h5 {
+    margin: 0 0 6px 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #222;
+}
+
+.store-item p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #666;
+    line-height: 1.4;
+}
+
+.pedido-main {
+    padding: 28px;
+}
+
+.pedido-main h1 {
+    font-size: 2rem;
+    font-weight: 800;
+    margin-bottom: 24px;
+    color: #6f2cff;
+}
+
+.pedido-main h4 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-top: 24px;
+    margin-bottom: 14px;
+    color: #222;
+}
+
+.pedido-main textarea,
+.pedido-main select {
+    width: 100%;
+    border: 1px solid #ddd;
+    border-radius: 14px;
+    padding: 14px 16px;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border 0.2s ease, box-shadow 0.2s ease;
+    background: #fff;
+}
+
+.pedido-main textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.pedido-main textarea:focus,
+.pedido-main select:focus {
+    border-color: #8c52ff;
+    box-shadow: 0 0 0 4px rgba(140, 82, 255, 0.12);
+}
+
+.pedido-main input[type="radio"] {
+    margin-right: 8px;
+    accent-color: #8c52ff;
+}
+
+.pedido-main > div {
+    margin-bottom: 12px;
+    font-size: 0.95rem;
+    color: #333;
+}
+
+.pedido-summary {
+    padding: 24px;
+    background: linear-gradient(135deg, #7b2cff, #c114ff);
+    color: white;
+    position: sticky;
+    top: 20px;
+}
+
+.pedido-summary h3 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin-bottom: 20px;
+}
+
+.pedido-summary p {
+    font-size: 0.98rem;
+    margin-bottom: 12px;
+    color: rgba(255, 255, 255, 0.95);
+}
+
+.pedido-summary strong {
+    color: #ffffff;
+}
+
+.pedido-summary hr {
+    border: none;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.25);
+    margin: 20px 0;
+}
+
+.pedido-summary h4 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin-top: 18px;
+    margin-bottom: 20px;
+}
+
+.pedido-summary button {
+    width: 100%;
+    border: none;
+    border-radius: 14px;
+    padding: 14px 18px;
+    font-size: 1rem;
+    font-weight: 700;
+    background: #ffffff;
+    color: #7b2cff;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.pedido-summary button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.18);
+}
+
+@media (max-width: 1100px) {
+    .hacerpedido-layout {
+        grid-template-columns: 240px 1fr;
+    }
+
+    .pedido-summary {
+        grid-column: 1 / -1;
+        position: static;
+    }
+}
+
+@media (max-width: 768px) {
+    .hacerpedido-layout {
+        grid-template-columns: 1fr;
+        padding: 20px;
+    }
+
+    .stores-sidebar,
+    .pedido-summary {
+        position: static;
+        max-height: none;
+    }
+
+    .pedido-main,
+    .stores-sidebar,
+    .pedido-summary {
+        padding: 20px;
+    }
+
+    .pedido-main h1 {
+        font-size: 1.6rem;
+    }
+}
