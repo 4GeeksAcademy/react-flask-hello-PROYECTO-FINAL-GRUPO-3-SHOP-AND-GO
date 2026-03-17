@@ -6,6 +6,7 @@ import './authpage.css'
 import './howorks.css'
 import './foriders.css'
 import './help.css'
+import './profileuser.css'
 import { RouterProvider } from "react-router-dom";  // Import RouterProvider to use the router
 import { router } from "./routes";  // Import the router configuration
 import { StoreProvider } from './hooks/useGlobalReducer';  // Import the StoreProvider for global state management

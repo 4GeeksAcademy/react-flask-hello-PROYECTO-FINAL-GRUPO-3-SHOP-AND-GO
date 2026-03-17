@@ -80,7 +80,24 @@ def get_users():
 
     return jsonify([user.serialize() for user in users]), 200
 
+#PROFILE
+@api.route('/profile', methods=['GET'])
+@jwt_required()
+def get_profile():
+    # Obtener el ID del usuario desde el token
+    current_user_id = int(get_jwt_identity())
+    
+    # Buscar el usuario
+    user = db.session.execute(
+        select(User).where(User.id == current_user_id)
+    ).scalar_one_or_none()
+    
+    if user is None:
+        return jsonify({"error": "User not found"}), 404
+    
+    return jsonify(user.serialize()), 200
 
+#USUARIOS POR ID
 @api.route('/users/<int:user_id>', methods=['GET'])
 @jwt_required()
 def get_user(user_id):
