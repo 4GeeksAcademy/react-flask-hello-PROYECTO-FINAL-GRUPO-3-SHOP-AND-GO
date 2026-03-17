@@ -1226,3 +1226,34 @@ def stripe_webhook():
             db.session.commit()
 
     return jsonify({"msg": "Webhook received"}), 200
+
+#CALCULAR PRECIO
+@api.route("/calculate-price", methods=["POST"])
+@jwt_required()
+def calculate_price():
+
+    data = request.get_json()
+
+    store_id = data.get("store_id")
+    address_id = data.get("address_id")
+    bags_count = data.get("bags_count", 1)
+
+    store = db.session.get(Store, store_id)
+    address = db.session.get(Address, address_id)
+
+    if not store or not address:
+        return jsonify({"error": "Invalid store or address"}), 400
+
+    distance = calculate_distance(
+        store.latitude,
+        store.longitude,
+        address.latitude,
+        address.longitude
+    )
+
+    price = calculate_order_price(distance, bags_count)
+
+    return jsonify({
+        "distance_km": round(distance, 2),
+        "price": price
+    }), 200
