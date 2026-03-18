@@ -145,7 +145,7 @@ class Order(db.Model):
     driver: Mapped["User"] = relationship(back_populates="deliveries", foreign_keys=[driver_id])
     store: Mapped["Store"] = relationship(back_populates="orders")
     address: Mapped["Address"] = relationship(back_populates="orders")
-    payment: Mapped["Payment"] = relationship(back_populates="order", uselist=False)
+    payment: Mapped["Payment"] = relationship(back_populates="order", cascade="all, delete-orphan")
 
     def serialize(self):
         return {
@@ -204,7 +204,7 @@ class Payment(db.Model):
     stripe_session_id: Mapped[str] = mapped_column(String(200), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc))
 
-    order_id: Mapped[int] = mapped_column(ForeignKey("orders.id"), unique=True)
+    order_id: Mapped[int] = mapped_column(ForeignKey("orders.id"), nullable=False)
     payment_method_id: Mapped[int] = mapped_column(ForeignKey("payment_methods.id"), nullable=True)
 
     order: Mapped["Order"] = relationship(back_populates="payment")
