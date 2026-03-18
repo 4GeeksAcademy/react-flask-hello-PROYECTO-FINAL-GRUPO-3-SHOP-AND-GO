@@ -5,35 +5,36 @@ import { register, login } from "../Services/authService";
 
 export const Authpage = () => {
     const navigate = useNavigate();
-
+ 
     const [showLogin, setShowLogin] = useState(true);
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
+    const [showToast, setShowToast] = useState(false);
+ 
     const [newUser, setNewUser] = useState({
         name: "",
         email: "",
         phone: "",
         password: "",
         confirmPassword: "",
-        role: "user"  // "user" o "driver"
+        role: "user"
     });
-
+ 
     const [loginUser, setLoginUser] = useState({
         email: "",
         password: "",
-        role: "user"  // "user" o "driver"
+        role: "user"
     });
-
+ 
     const handleChange = (e) => {
         setNewUser({ ...newUser, [e.target.name]: e.target.value });
     };
-
+ 
     const handleLoginChange = (e) => {
         setLoginUser({ ...loginUser, [e.target.name]: e.target.value });
     };
-
-    const handleSubmit = (e) => {
+ 
+    const handleSubmit = async (e) => {
         e.preventDefault();
         if (!newUser.name || !newUser.email || !newUser.phone || !newUser.password || !newUser.confirmPassword) {
             alert("Todos los campos son obligatorios");
@@ -43,9 +44,16 @@ export const Authpage = () => {
             alert("Las contraseñas no coinciden");
             return;
         }
-        register(newUser, navigate);
+        const success = await register(newUser);
+        if (success) {
+            setShowToast(true);
+            setTimeout(() => {
+                setShowToast(false);
+                setShowLogin(true);
+            }, 2000);
+        }
     };
-
+ 
     const handleLoginSubmit = (e) => {
         e.preventDefault();
         if (!loginUser.email || !loginUser.password) {
@@ -54,24 +62,24 @@ export const Authpage = () => {
         }
         login(loginUser, navigate);
     };
-
+ 
     return (
         <div className="auth-page">
-
+ 
             <div className="auth-wrapper">
                 <div className={`auth-slider ${showLogin ? "show-login" : "show-register"}`}>
-
+ 
                     {/* ================================
                         PANEL LOGIN
                     ================================ */}
                     <div className="auth-panel login-panel">
-
+ 
                         <div className="auth-logo">
                             <div className="auth-logo-icon">🚴</div>
                         </div>
                         <h1>INICIAR SESIÓN 🚀</h1>
                         <p className="auth-subtitle">Bienvenido de nuevo</p>
-
+ 
                         {/* ROLE SELECTOR LOGIN */}
                         <div className="role-selector">
                             <button
@@ -95,7 +103,7 @@ export const Authpage = () => {
                                 <span className="role-desc">Quiero hacer entregas</span>
                             </button>
                         </div>
-
+ 
                         <form onSubmit={handleLoginSubmit}>
                             <div className="input-group">
                                 <label>Correo Electrónico</label>
@@ -110,7 +118,7 @@ export const Authpage = () => {
                                     />
                                 </div>
                             </div>
-
+ 
                             <div className="input-group">
                                 <label>Contraseña</label>
                                 <div className="input-wrapper">
@@ -127,18 +135,10 @@ export const Authpage = () => {
                                     </button>
                                 </div>
                             </div>
-
+ 
                             <button type="submit">INICIAR SESIÓN</button>
                         </form>
-
-                        <div className="auth-divider"><span>O inicia sesión con</span></div>
-
-                        <div className="social-buttons">
-                            <button type="button" className="social-btn">G</button>
-                            <button type="button" className="social-btn">f</button>
-                            <button type="button" className="social-btn">🍎</button>
-                        </div>
-
+ 
                         <p className="auth-toggle-text">
                             ¿No tienes cuenta?
                             <button type="button" onClick={() => setShowLogin(false)}>
@@ -146,18 +146,18 @@ export const Authpage = () => {
                             </button>
                         </p>
                     </div>
-
+ 
                     {/* ================================
                         PANEL REGISTER
                     ================================ */}
                     <div className="auth-panel register-panel">
-
+ 
                         <div className="auth-logo">
                             <div className="auth-logo-icon">🚴</div>
                         </div>
                         <h1>CREAR CUENTA 🚀</h1>
                         <p className="auth-subtitle">Únete a SHOP&GO</p>
-
+ 
                         {/* ROLE SELECTOR REGISTER */}
                         <div className="role-selector">
                             <button
@@ -181,7 +181,7 @@ export const Authpage = () => {
                                 <span className="role-desc">Quiero hacer entregas</span>
                             </button>
                         </div>
-
+ 
                         <form onSubmit={handleSubmit}>
                             <div className="input-group">
                                 <label>Nombre Completo</label>
@@ -196,7 +196,7 @@ export const Authpage = () => {
                                     />
                                 </div>
                             </div>
-
+ 
                             <div className="input-grid">
                                 <div className="input-group">
                                     <label>Correo Electrónico</label>
@@ -225,7 +225,7 @@ export const Authpage = () => {
                                     </div>
                                 </div>
                             </div>
-
+ 
                             <div className="input-grid">
                                 <div className="input-group">
                                     <label>Contraseña</label>
@@ -260,25 +260,17 @@ export const Authpage = () => {
                                     </div>
                                 </div>
                             </div>
-
+ 
                             <div className="terms-box">
                                 <input type="checkbox" id="terms" required />
                                 <label htmlFor="terms">
                                     Acepto los <a href="#">Términos y Condiciones</a> y la <a href="#">Política de Privacidad</a>
                                 </label>
                             </div>
-
+ 
                             <button type="submit">CREAR CUENTA</button>
                         </form>
-
-                        <div className="auth-divider"><span>O regístrate con</span></div>
-
-                        <div className="social-buttons">
-                            <button type="button" className="social-btn">G</button>
-                            <button type="button" className="social-btn">f</button>
-                            <button type="button" className="social-btn">🍎</button>
-                        </div>
-
+ 
                         <p className="auth-toggle-text">
                             ¿Ya tienes cuenta?
                             <button type="button" onClick={() => setShowLogin(true)}>
@@ -286,10 +278,10 @@ export const Authpage = () => {
                             </button>
                         </p>
                     </div>
-
+ 
                 </div>
             </div>
-
+ 
             {/* Benefits */}
             <div className="auth-benefits">
                 <div className="benefit-item">
@@ -305,6 +297,13 @@ export const Authpage = () => {
                     <span>Mejor calidad</span>
                 </div>
             </div>
+ 
+            {/* Toast de éxito */}
+            {showToast && (
+                <div className="auth-toast">
+                    ✅ ¡Cuenta creada! Redirigiendo al login...
+                </div>
+            )}
         </div>
     );
 };

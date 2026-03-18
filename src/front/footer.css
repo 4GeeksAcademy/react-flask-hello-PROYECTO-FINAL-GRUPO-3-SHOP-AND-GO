@@ -1,0 +1,121 @@
+/* ===== Footer ===== */
+
+.footer {
+  background-color: #111827;
+  color: #ffffff;
+  padding: 3rem 0;
+}
+
+.footer-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+/* ---- Grid de columnas ---- */
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+@media (min-width: 768px) {
+  .footer-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* ---- Brand / Logo ---- */
+
+.footer-logo-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.footer-logo-icon {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(to bottom right, #8b5cf6, #d946ef);
+  border-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.footer-logo-text {
+  font-weight: 700;
+  font-size: 1.25rem;
+}
+
+.footer-description {
+  color: #9ca3af;
+  line-height: 1.6;
+}
+
+/* ---- Columnas de links ---- */
+
+.footer-column-title {
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.footer-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.footer-links a {
+  color: #9ca3af;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.footer-links a:hover {
+  color: #ffffff;
+}
+
+/* ---- Bottom bar ---- */
+
+.footer-bottom {
+  border-top: 1px solid #1f2937;
+  padding-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .footer-bottom {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+}
+
+.footer-copyright {
+  color: #9ca3af;
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+.footer-socials {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.footer-socials a {
+  color: #9ca3af;
+  transition: color 0.2s ease;
+}
+
+.footer-socials a:hover {
+  color: #ffffff;
+}

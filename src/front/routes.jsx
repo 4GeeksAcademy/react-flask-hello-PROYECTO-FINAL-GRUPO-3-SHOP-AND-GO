@@ -1,7 +1,7 @@
 import {
-    createBrowserRouter,
-    createRoutesFromElements,
-    Route,
+  createBrowserRouter,
+  createRoutesFromElements,
+  Route,
 } from "react-router-dom";
 import { Layout } from "./pages/Layout";
 import { Home } from "./pages/Home";
@@ -16,27 +16,69 @@ import { ProfileDriver } from "./pages/ProfileDriver";
 import HacerPedido from "./pages/HacerPedido";
 import { MisPedidos } from "./pages/MisPedidos";
 import { TrackingPedido } from "./pages/TrackingPedido";
+import { PrivateRoute } from "./components/PrivateRoute";
 // import { Stores } from "./pages/Stores";
 
 export const router = createBrowserRouter(
-    createRoutesFromElements(
-      <Route path="/" element={<Layout />} errorElement={<h1>Not found!</h1>} >
+  createRoutesFromElements(
+    <Route path="/" element={<Layout />} errorElement={<h1>Not found!</h1>}>
 
-        {/* Nested Routes: Defines sub-routes within the BaseHome component. */}
-        <Route path= "/" element={<Home />} />
-        {/* <Route path="/single/:theId" element={ <Single />} />  Dynamic route for single items */}
-        {/* <Route path="/demo" element={<Demo />} /> */}
-        <Route path="/register" element={<Authpage/>}/> {/* //Register */}
-        <Route path="/Login" element={<Authpage/>}/> {/* //Login */}
-        <Route path="/Howorks" element={<Howorks/>}/> {/* Cómo funciona*/}
-        <Route path="/Foriders" element={<Foriders/>}/> {/* Para riders*/}
-        <Route path="/Help" element={<Help/>}/> {/* Ayuda*/}
-        <Route path="/Profileuser" element={<Profileuser/>}/> {/* Perfil usuario*/}
-        <Route path="/driver/profile" element={<ProfileDriver/>}/> {/* URGENTE CAMBIAR RUTA*/}
-        <Route path="/hacer-pedido" element={<HacerPedido />} />
-        <Route path="/mis-pedidos" element={<MisPedidos />} />
-        <Route path="/tracking/:orderId" element={<TrackingPedido />} />
-        {/* <Route path="/Stores" element={<Stores/>}/> TIENDAS */}
-      </Route>
-    )
-)
+  {/* Nested Routes */}
+  <Route path="/" element={<Home />} />
+  {/* <Route path="/single/:theId" element={<Single />} /> */}
+  {/* <Route path="/demo" element={<Demo />} /> */}
+
+  <Route path="/register" element={<Authpage />} />
+  <Route path="/Login" element={<Authpage />} />
+  <Route path="/Howorks" element={<Howorks />} />
+  <Route path="/Foriders" element={<Foriders />} />
+  <Route path="/Help" element={<Help />} />
+
+  <Route
+    path="/Profileuser"
+    element={
+      <PrivateRoute>
+        <Profileuser />
+      </PrivateRoute>
+    }
+  />
+
+  <Route
+    path="/driver/profile"
+    element={
+      <PrivateRoute>
+        <ProfileDriver />
+      </PrivateRoute>
+    }
+  />
+
+  <Route
+    path="/hacer-pedido"
+    element={
+      <PrivateRoute>
+        <HacerPedido />
+      </PrivateRoute>
+    }
+  />
+
+  <Route
+    path="/mis-pedidos"
+    element={
+      <PrivateRoute>
+        <MisPedidos />
+      </PrivateRoute>
+    }
+  />
+
+  <Route
+    path="/tracking/:orderId"
+    element={
+      <PrivateRoute>
+        <TrackingPedido />
+      </PrivateRoute>
+    }
+  />
+
+  {/* <Route path="/Stores" element={<Stores />} /> */}
+
+</Route>
