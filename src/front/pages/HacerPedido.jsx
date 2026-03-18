@@ -81,50 +81,6 @@ const HacerPedido = () => {
         }
     };
 
-    const handleCreatePaymentMethod = async () => {
-        try {
-            const payload = {
-                ...newPaymentMethod,
-                stripe_payment_method_id:
-                    newPaymentMethod.stripe_payment_method_id || "pm_test_" + Date.now()
-            };
-
-            const { response, data } = await createPaymentMethod(payload);
-
-            if (!response.ok) {
-                console.log("Error:", data);
-                alert(data.error || "Error al crear método de pago");
-                return;
-            }
-
-            const updatedPaymentMethods = await getPaymentMethods();
-
-            if (Array.isArray(updatedPaymentMethods)) {
-                setPaymentMethods(updatedPaymentMethods);
-            }
-
-            if (data.payment_method?.id) {
-                setSelectedPaymentMethod(data.payment_method.id);
-            }
-
-            setNewPaymentMethod({
-                provider: "stripe",
-                stripe_payment_method_id: "",
-                brand: "",
-                last4: "",
-                exp_month: "",
-                exp_year: "",
-                is_default: false
-            });
-
-            setShowNewPaymentMethodForm(false);
-
-        } catch (error) {
-            console.log(error);
-            alert("Error creando método de pago");
-        }
-    };
-
     const handleConfirmOrder = async () => {
         if (!selectedStore) {
             alert("Selecciona una tienda");
@@ -162,8 +118,32 @@ const HacerPedido = () => {
                 return;
             }
 
+            const orderId = data.order.id;
+
+            const token = localStorage.getItem("token");
+
+            const paymentResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/payments`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    order_id: orderId,
+                    payment_method_id: selectedPaymentMethod
+                })
+            });
+
+            const paymentData = await paymentResponse.json();
+
+            if (!paymentResponse.ok) {
+                console.log("Error creating payment:", paymentData);
+                alert(paymentData.error || "El pago ha fallado");
+                return;
+            }
+
             console.log("Order created:", data);
-            alert("Pedido creado correctamente");
+            console.log("Payment created:", paymentData);
             navigate("/mis-pedidos");
         } catch (error) {
             console.log(error);

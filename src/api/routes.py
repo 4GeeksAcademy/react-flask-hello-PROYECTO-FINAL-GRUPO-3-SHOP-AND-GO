@@ -10,6 +10,7 @@ from sqlalchemy import select
 import random, requests
 import stripe
 import os
+stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 
 api = Blueprint('api', __name__)
 
@@ -998,10 +999,14 @@ def create_payment():
     data = request.get_json() or {}
 
     order_id = data.get("order_id")
+    payment_method_id = data.get("payment_method_id")
     currency = data.get("currency", "eur")
 
     if not order_id:
         return jsonify({"error": "order_id is required"}), 400
+
+    if not payment_method_id:
+        return jsonify({"error": "payment_method_id is required"}), 400
 
     # verificar que el pedido existe
     order = db.session.execute(
@@ -1023,21 +1028,48 @@ def create_payment():
     if existing_payment:
         return jsonify({"error": "This order already has a payment"}), 409
 
+    # buscar el metodo de pago guardado
+    payment_method = db.session.execute(
+        select(PaymentMethod).where(PaymentMethod.id == payment_method_id)
+    ).scalar_one_or_none()
+
+    if payment_method is None:
+        return jsonify({"error": "Payment method not found"}), 404
+
+    # verificar que el metodo de pago pertenece al usuario
+    if payment_method.user_id != user_id:
+        return jsonify({"error": "Forbidden"}), 403
+
     try:
-        # crear el Payment Intent en Stripe
+        # crear y confirmar el Payment Intent en Stripe
         intent = stripe.PaymentIntent.create(
             amount=order.amount_cents,
             currency=currency,
+            payment_method=payment_method.stripe_payment_method_id,
+            confirm=True,
+            automatic_payment_methods={
+                "enabled": True,
+                "allow_redirects": "never"
+            },
             metadata={"order_id": order_id}
         )
+
+        # decidir estado del pago segun respuesta de Stripe
+        if intent["status"] == "succeeded":
+            payment_status = PaymentStatus.paid
+        elif intent["status"] == "processing":
+            payment_status = PaymentStatus.pending
+        else:
+            payment_status = PaymentStatus.failed
 
         # guardar el pago en nuestra BD
         new_payment = Payment(
             amount_cents=order.amount_cents,
             currency=currency,
-            status=PaymentStatus.pending,
+            status=payment_status,
             stripe_session_id=intent["id"],
-            order_id=order_id
+            order_id=order_id,
+            payment_method_id=payment_method.id
         )
 
         db.session.add(new_payment)
@@ -1045,13 +1077,21 @@ def create_payment():
 
         return jsonify({
             "msg": "Payment created successfully",
-            "client_secret": intent["client_secret"],
-            "payment": new_payment.serialize()
+            "payment": new_payment.serialize(),
+            "stripe_status": intent["status"]
         }), 201
 
+    except stripe.error.CardError as e:
+        return jsonify({
+            "error": "Card was declined",
+            "details": str(e)
+        }), 402
+
     except stripe.error.StripeError as e:
-        db.session.rollback()
-        return jsonify({"error": f"Stripe error: {str(e)}"}), 502
+        return jsonify({
+            "error": "Stripe error",
+            "details": str(e)
+        }), 400
 
     except Exception as e:
         db.session.rollback()
