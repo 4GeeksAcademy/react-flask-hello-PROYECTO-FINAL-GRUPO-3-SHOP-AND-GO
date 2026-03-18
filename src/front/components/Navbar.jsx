@@ -27,6 +27,7 @@ export const Navbar = () => {
 						<a className= "nav-link" href="/"> Inicio</a>
 						<a className="nav-link" href="/Howorks"> Cómo funciona</a>
 						<a className="nav-link" href="/Foriders"> Para Riders</a>
+						<a className="nav-link" href="/Stores"> Tiendas</a>
 						<a className="nav-link" href="/Help"> Ayuda </a>
 						<a className="nav-link" href="/login">Iniciar sesión</a>
 						{/* <a className="nav-link" href="/profile">Mi Perfil</a> esto queda pdte ver si va acá*/}

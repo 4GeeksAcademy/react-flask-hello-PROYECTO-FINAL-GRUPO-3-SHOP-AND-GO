@@ -13,16 +13,13 @@ export const register = async (newUser, navigate) => {
     });
 
     const data = await response.json();
-    
+
     if (!response.ok) {
         alert(data.error);
         return;
     }
 
-    // Guardar token
     localStorage.setItem("token", data.token);
-    
-    // Navegar a home
     navigate("/login");
 };
 
@@ -39,17 +36,23 @@ export const login = async (user, navigate) => {
     });
 
     const data = await response.json();
-    
+
     if (!response.ok) {
         alert(data.error);
         return;
     }
 
-    // Guardar token
+    // Guardamos token y role del formulario
     localStorage.setItem("token", data.token);
-    
-    // Navegar a home
-    navigate("/Profileuser");
+    localStorage.setItem("role", user.role);
+
+    // Navegamos según el role seleccionado
+    if (user.role === "driver") {
+        navigate("/rider-profile"); //// //========================================
+        // URGENTE EDITARRR!!
+    } else {
+        navigate("/Profileuser");
+    }
 };
 
 //========================================
@@ -57,6 +60,7 @@ export const login = async (user, navigate) => {
 //========================================
 export const logout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("role");
 };
 
 //========================================
@@ -67,28 +71,35 @@ export const getToken = () => {
 };
 
 //========================================
+//GET ROLE
+//========================================
+export const getRole = () => {
+    return localStorage.getItem("role");
+};
+
+//========================================
 //GET PROFILE
 //========================================
 export const getProfile = async () => {
-  const token = getToken();
-  
-  if (!token) {
-    throw new Error("No token found");
-  }
+    const token = getToken();
 
-  const response = await fetch(`${API_URL}/api/profile`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${token}`
+    if (!token) {
+        throw new Error("No token found");
     }
-  });
 
-  const data = await response.json();
+    const response = await fetch(`${API_URL}/api/profile`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        }
+    });
 
-  if (!response.ok) {
-    throw new Error(data.error || "Error al obtener perfil");
-  }
+    const data = await response.json();
 
-  return data;
+    if (!response.ok) {
+        throw new Error(data.error || "Error al obtener perfil");
+    }
+
+    return data;
 };

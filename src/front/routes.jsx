@@ -14,6 +14,7 @@ import { Howorks } from "./pages/Howorks";
 import { Foriders } from "./pages/Foriders";
 import { Help } from "./pages/Help";
 import { Profileuser } from "./pages/Profileuser";
+import { Stores } from "./pages/Stores";
 
 export const router = createBrowserRouter(
     createRoutesFromElements(
@@ -34,6 +35,7 @@ export const router = createBrowserRouter(
         <Route path="/Login" element={<Authpage/>}/> {/* //Login */}
         <Route path="/Howorks" element={<Howorks/>}/> {/* Cómo funciona*/}
         <Route path="/Foriders" element={<Foriders/>}/> {/* Para riders*/}
+        <Route path="/Stores" element={<Stores/>}/> {/* Para riders*/}
         <Route path="/Help" element={<Help/>}/> {/* Ayuda*/}
         <Route path="/Profileuser" element={<Profileuser/>}/> {/* Perfil usuario*/}
       </Route>
