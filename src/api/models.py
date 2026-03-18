@@ -33,7 +33,7 @@ class PaymentStatus(enum.Enum):
 # =========================
 
 class User(db.Model):
-    __tablename__ = "users"  # ✅ cambiado de "user" a "users"
+    __tablename__ = "users"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(120), nullable=False)
@@ -46,6 +46,10 @@ class User(db.Model):
     addresses: Mapped[list["Address"]] = relationship(back_populates="user")
     orders: Mapped[list["Order"]] = relationship(back_populates="user", foreign_keys="Order.user_id")
     deliveries: Mapped[list["Order"]] = relationship(back_populates="driver", foreign_keys="Order.driver_id")
+    payment_methods: Mapped[list["PaymentMethod"]] = relationship(
+        back_populates="user",
+        cascade="all, delete-orphan"
+    )
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password).decode("utf-8")
@@ -61,13 +65,13 @@ class User(db.Model):
             "phone": self.phone,
             "role": self.role.value,
             "is_available": self.is_available,
-            "addresses": [address.serialize() for address in self.addresses]
+            "addresses": [address.serialize() for address in self.addresses],
+            "payment_methods": [payment_method.serialize() for payment_method in self.payment_methods]
         }
 
-# -----------------------------------
 
 class Address(db.Model):
-    __tablename__ = "addresses"  # ✅ cambiado a plural
+    __tablename__ = "addresses"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     street: Mapped[str] = mapped_column(String(200), nullable=False)
@@ -77,7 +81,7 @@ class Address(db.Model):
     longitude: Mapped[float] = mapped_column(Float, nullable=True)
     label: Mapped[str] = mapped_column(String(100), nullable=True)
 
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))  # ✅ actualizado a "users.id"
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     user: Mapped["User"] = relationship(back_populates="addresses")
     orders: Mapped[list["Order"]] = relationship(back_populates="address")
 
@@ -92,10 +96,9 @@ class Address(db.Model):
             "longitude": self.longitude
         }
 
-# -----------------------------------
 
 class Store(db.Model):
-    __tablename__ = "stores"  # ✅ cambiado a plural
+    __tablename__ = "stores"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(120), nullable=False)
@@ -122,22 +125,21 @@ class Store(db.Model):
             "longitude": self.longitude
         }
 
-# -----------------------------------
 
 class Order(db.Model):
-    __tablename__ = "orders"  # ✅ cambiado a plural
+    __tablename__ = "orders"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    bags_count: Mapped[int] = mapped_column(Integer, nullable=True)   # ✅ añadido nullable=True
-    notes: Mapped[str] = mapped_column(String(500), nullable=True)    # ✅ añadido nullable=True
+    bags_count: Mapped[int] = mapped_column(Integer, nullable=True)
+    notes: Mapped[str] = mapped_column(String(500), nullable=True)
     status: Mapped[OrderStatus] = mapped_column(Enum(OrderStatus), default=OrderStatus.pending)
     amount_cents: Mapped[int] = mapped_column(Integer)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc))  # ✅ utcnow reemplazado
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc))
 
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))          # ✅ actualizado
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     driver_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=True)
-    store_id: Mapped[int] = mapped_column(ForeignKey("stores.id"))        # ✅ actualizado
-    address_id: Mapped[int] = mapped_column(ForeignKey("addresses.id"))   # ✅ actualizado
+    store_id: Mapped[int] = mapped_column(ForeignKey("stores.id"))
+    address_id: Mapped[int] = mapped_column(ForeignKey("addresses.id"))
 
     user: Mapped["User"] = relationship(back_populates="orders", foreign_keys=[user_id])
     driver: Mapped["User"] = relationship(back_populates="deliveries", foreign_keys=[driver_id])
@@ -160,20 +162,53 @@ class Order(db.Model):
             "payment_status": self.payment.status.value if self.payment else "No payment"
         }
 
-# -----------------------------------
+
+class PaymentMethod(db.Model):
+    __tablename__ = "payment_methods"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    provider: Mapped[str] = mapped_column(String(50), default="stripe")
+    stripe_payment_method_id: Mapped[str] = mapped_column(String(200), unique=True, nullable=False)
+
+    brand: Mapped[str] = mapped_column(String(50), nullable=True)
+    last4: Mapped[str] = mapped_column(String(4), nullable=True)
+    exp_month: Mapped[int] = mapped_column(Integer, nullable=True)
+    exp_year: Mapped[int] = mapped_column(Integer, nullable=True)
+
+    is_default: Mapped[bool] = mapped_column(Boolean, default=False)
+
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
+    user: Mapped["User"] = relationship(back_populates="payment_methods")
+
+    payments: Mapped[list["Payment"]] = relationship(back_populates="payment_method")
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "provider": self.provider,
+            "brand": self.brand,
+            "last4": self.last4,
+            "exp_month": self.exp_month,
+            "exp_year": self.exp_year,
+            "is_default": self.is_default
+        }
+
 
 class Payment(db.Model):
-    __tablename__ = "payments"  
+    __tablename__ = "payments"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     amount_cents: Mapped[int] = mapped_column(Integer)
     currency: Mapped[str] = mapped_column(String(10))
     status: Mapped[PaymentStatus] = mapped_column(Enum(PaymentStatus), default=PaymentStatus.pending)
-    stripe_session_id: Mapped[str] = mapped_column(String(200), nullable=True)  # ✅ añadido nullable=True
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc))  # ✅ utcnow reemplazado
+    stripe_session_id: Mapped[str] = mapped_column(String(200), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc))
 
-    order_id: Mapped[int] = mapped_column(ForeignKey("orders.id"), unique=True)  # ✅ actualizado
+    order_id: Mapped[int] = mapped_column(ForeignKey("orders.id"), unique=True)
+    payment_method_id: Mapped[int] = mapped_column(ForeignKey("payment_methods.id"), nullable=True)
+
     order: Mapped["Order"] = relationship(back_populates="payment")
+    payment_method: Mapped["PaymentMethod"] = relationship(back_populates="payments")
 
     def serialize(self):
         return {
@@ -182,5 +217,6 @@ class Payment(db.Model):
             "currency": self.currency,
             "status": self.status.value,
             "stripe_id": self.stripe_session_id,
-            "order_id": self.order_id
+            "order_id": self.order_id,
+            "payment_method": self.payment_method.serialize() if self.payment_method else None
         }

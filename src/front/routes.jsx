@@ -13,6 +13,7 @@ import { Foriders } from "./pages/Foriders";
 import { Help } from "./pages/Help";
 import { Profileuser } from "./pages/Profileuser";
 import { ProfileDriver } from "./pages/ProfileDriver";
+import HacerPedido from "./pages/HacerPedido";
 
 export const router = createBrowserRouter(
     createRoutesFromElements(
@@ -25,6 +26,7 @@ export const router = createBrowserRouter(
         <Route path="/Help" element={<Help/>}/>
         <Route path="/Profileuser" element={<Profileuser/>}/>
         <Route path="/driver/profile" element={<ProfileDriver/>}/>
+        <Route path="/hacer-pedido" element={<HacerPedido />} />
       </Route>
     )
 )

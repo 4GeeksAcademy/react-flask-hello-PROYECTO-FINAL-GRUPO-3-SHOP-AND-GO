@@ -2,7 +2,7 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 from flask import Flask, request, jsonify, url_for, Blueprint
-from api.models import db, User, Address, UserRole, Store, Order, OrderStatus,Payment, PaymentStatus
+from api.models import db, User, Address, UserRole, Store, Order, OrderStatus, Payment, PaymentStatus, PaymentMethod
 from api.utils import generate_sitemap, APIException, calculate_distance, calculate_order_price,geoapify_forward_geocode
 from flask_cors import CORS
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
@@ -417,106 +417,6 @@ def delete_address(address_id):
         return jsonify({"error": str(e)}), 500
 
     return jsonify([s.serialize() for s in stores]), 200
-
-#--------------CREAR TIENDAS-----------------------------#
-
-# @api.route("/stores", methods=['POST'])
-# # @jwt_required() #solo admin puede crear tiendas
-# def create_store():
-#     data = request.get_json()
-#     name = data.get("name")
-#     qr_code = data.get("qr_code")
-
-#     if not name or not qr_code:
-#         return jsonify({"error": "name and qr_code required"}), 400
-    
-#     new_store = Store(
-#         name=name,
-#         qr_code=qr_code,
-#         is_active=True
-#     )
-
-#     db.session.add(new_store)
-#     db.session.commit()
-    
-#     return jsonify(new_store.serialize()), 201
-
-#OBTENER TODAS LAS TIENDAS
-# @api.route("/stores", methods=['GET'])
-# def get_stores():
-#     stores = db.session.execute(
-#         select(Store).where(Store.is_active == True)
-#     ).scalars().all()
-
-#     return jsonify([s.serialize() for s in stores]), 200
-
-# ── PUT UPDATE STORE (solo admin) ─────────────────────────────
-# @api.route('/stores/<int:store_id>', methods=['PUT'])
-# @jwt_required()
-# def update_store(store_id):
-#     user_id = int(get_jwt_identity())
-
-#     current_user = db.session.execute(
-#         select(User).where(User.id == user_id)
-#     ).scalar_one_or_none()
-
-#     # solo el admin puede editar tiendas
-#     if current_user is None or current_user.role != UserRole.admin:
-#         return jsonify({"error": "Forbidden, admin only"}), 403
-
-#     store = db.session.execute(
-#         select(Store).where(Store.id == store_id)
-#     ).scalar_one_or_none()
-
-#     if store is None:
-#         return jsonify({"error": "Store not found"}), 404
-
-#     data = request.get_json() or {}
-
-#     # solo se actualizan los campos que lleguen
-#     if "name" in data:
-#         store.name = data["name"]
-
-#     if "qr_code" in data:
-#         store.qr_code = data["qr_code"]
-
-#     if "is_active" in data:
-#         store.is_active = data["is_active"]
-
-#     db.session.commit()
-
-#     return jsonify({
-#         "msg": "Store updated successfully",
-#         "store": store.serialize()
-#     }), 200
-
-# # ── DELETE STORE (solo admin) ──────────────────────────────────
-# @api.route('/stores/<int:store_id>', methods=['DELETE'])
-# @jwt_required()
-# def delete_store(store_id):
-#     user_id = int(get_jwt_identity())
-
-#     current_user = db.session.execute(
-#         select(User).where(User.id == user_id)
-#     ).scalar_one_or_none()
-
-#     # solo el admin puede eliminar tiendas
-#     if current_user is None or current_user.role != UserRole.admin:
-#         return jsonify({"error": "Forbidden, admin only"}), 403
-
-#     store = db.session.execute(
-#         select(Store).where(Store.id == store_id)
-#     ).scalar_one_or_none()
-
-#     if store is None:
-#         return jsonify({"error": "Store not found"}), 404
-
-#     # en vez de borrar físicamente, desactivamos la tienda
-#     # así no se pierden los pedidos asociados a ella
-#     store.is_active = False
-#     db.session.commit()
-
-#     return jsonify({"msg": "Store deactivated successfully"}), 200
 
 
 @api.route('/orders', methods=['POST'])
@@ -1326,3 +1226,195 @@ def stripe_webhook():
             db.session.commit()
 
     return jsonify({"msg": "Webhook received"}), 200
+
+#CALCULAR PRECIO
+@api.route("/calculate-price", methods=["POST"])
+@jwt_required()
+def calculate_price():
+
+    data = request.get_json()
+
+    store_id = data.get("store_id")
+    address_id = data.get("address_id")
+    bags_count = data.get("bags_count", 1)
+
+    store = db.session.get(Store, store_id)
+    address = db.session.get(Address, address_id)
+
+    if not store or not address:
+        return jsonify({"error": "Invalid store or address"}), 400
+
+    distance = calculate_distance(
+        store.latitude,
+        store.longitude,
+        address.latitude,
+        address.longitude
+    )
+
+    price = calculate_order_price(distance, bags_count)
+
+    return jsonify({
+        "distance_km": round(distance, 2),
+        "price": price
+    }), 200
+
+# ── POST CREATE PAYMENT METHOD ────────────────────────────────
+@api.route('/payment-method', methods=['POST'])
+@jwt_required()
+def create_payment_method():
+    user_id = int(get_jwt_identity())
+    data = request.get_json()
+
+    if not data:
+        return jsonify({"error": "Invalid or missing JSON body"}), 400
+
+    provider = data.get("provider", "stripe")
+    stripe_payment_method_id = data.get("stripe_payment_method_id")
+    brand = data.get("brand")
+    last4 = data.get("last4")
+    exp_month = data.get("exp_month")
+    exp_year = data.get("exp_year")
+    is_default = data.get("is_default", False)
+
+    if not stripe_payment_method_id:
+        return jsonify({"error": "stripe_payment_method_id is required"}), 400
+
+    existing_payment_method = db.session.execute(
+        select(PaymentMethod).where(
+            PaymentMethod.stripe_payment_method_id == stripe_payment_method_id
+        )
+    ).scalar_one_or_none()
+
+    if existing_payment_method:
+        return jsonify({"error": "Payment method already exists"}), 409
+
+    try:
+        if is_default:
+            current_defaults = db.session.execute(
+                select(PaymentMethod).where(
+                    PaymentMethod.user_id == user_id,
+                    PaymentMethod.is_default == True
+                )
+            ).scalars().all()
+
+            for pm in current_defaults:
+                pm.is_default = False
+
+        new_payment_method = PaymentMethod(
+            provider=provider,
+            stripe_payment_method_id=stripe_payment_method_id,
+            brand=brand,
+            last4=last4,
+            exp_month=exp_month,
+            exp_year=exp_year,
+            is_default=is_default,
+            user_id=user_id
+        )
+
+        db.session.add(new_payment_method)
+        db.session.commit()
+
+        return jsonify({
+            "msg": "Payment method created successfully",
+            "payment_method": new_payment_method.serialize()
+        }), 201
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+
+
+# ── GET ALL PAYMENT METHODS OF LOGGED USER ────────────────────
+@api.route('/payment-methods', methods=['GET'])
+@jwt_required()
+def get_payment_methods():
+    user_id = int(get_jwt_identity())
+
+    payment_methods = db.session.execute(
+        select(PaymentMethod).where(PaymentMethod.user_id == user_id)
+    ).scalars().all()
+
+    return jsonify([pm.serialize() for pm in payment_methods]), 200
+
+
+# ── GET ONE PAYMENT METHOD ────────────────────────────────────
+@api.route('/payment-method/<int:payment_method_id>', methods=['GET'])
+@jwt_required()
+def get_payment_method(payment_method_id):
+    user_id = int(get_jwt_identity())
+
+    payment_method = db.session.execute(
+        select(PaymentMethod).where(
+            PaymentMethod.id == payment_method_id,
+            PaymentMethod.user_id == user_id
+        )
+    ).scalar_one_or_none()
+
+    if payment_method is None:
+        return jsonify({"error": "Payment method not found"}), 404
+
+    return jsonify(payment_method.serialize()), 200
+
+
+# ── DELETE PAYMENT METHOD ─────────────────────────────────────
+@api.route('/payment-method/<int:payment_method_id>', methods=['DELETE'])
+@jwt_required()
+def delete_payment_method(payment_method_id):
+    user_id = int(get_jwt_identity())
+
+    payment_method = db.session.execute(
+        select(PaymentMethod).where(
+            PaymentMethod.id == payment_method_id,
+            PaymentMethod.user_id == user_id
+        )
+    ).scalar_one_or_none()
+
+    if payment_method is None:
+        return jsonify({"error": "Payment method not found"}), 404
+
+    try:
+        db.session.delete(payment_method)
+        db.session.commit()
+
+        return jsonify({"msg": "Payment method deleted successfully"}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+
+
+# ── PUT SET DEFAULT PAYMENT METHOD ────────────────────────────
+@api.route('/payment-method/<int:payment_method_id>/default', methods=['PUT'])
+@jwt_required()
+def set_default_payment_method(payment_method_id):
+    user_id = int(get_jwt_identity())
+
+    payment_method = db.session.execute(
+        select(PaymentMethod).where(
+            PaymentMethod.id == payment_method_id,
+            PaymentMethod.user_id == user_id
+        )
+    ).scalar_one_or_none()
+
+    if payment_method is None:
+        return jsonify({"error": "Payment method not found"}), 404
+
+    try:
+        user_payment_methods = db.session.execute(
+            select(PaymentMethod).where(PaymentMethod.user_id == user_id)
+        ).scalars().all()
+
+        for pm in user_payment_methods:
+            pm.is_default = False
+
+        payment_method.is_default = True
+        db.session.commit()
+
+        return jsonify({
+            "msg": "Default payment method updated successfully",
+            "payment_method": payment_method.serialize()
+        }), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
