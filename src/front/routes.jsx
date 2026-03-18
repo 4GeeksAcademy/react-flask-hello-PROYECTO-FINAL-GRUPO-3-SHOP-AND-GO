@@ -22,63 +22,62 @@ import { PrivateRoute } from "./components/PrivateRoute";
 export const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<Layout />} errorElement={<h1>Not found!</h1>}>
+      <Route path="/" element={<Home />} />
+      {/* <Route path="/single/:theId" element={<Single />} /> */}
+      {/* <Route path="/demo" element={<Demo />} /> */}
 
-  {/* Nested Routes */}
-  <Route path="/" element={<Home />} />
-  {/* <Route path="/single/:theId" element={<Single />} /> */}
-  {/* <Route path="/demo" element={<Demo />} /> */}
+      <Route path="/register" element={<Authpage />} />
+      <Route path="/Login" element={<Authpage />} />
+      <Route path="/Howorks" element={<Howorks />} />
+      <Route path="/Foriders" element={<Foriders />} />
+      <Route path="/Help" element={<Help />} />
 
-  <Route path="/register" element={<Authpage />} />
-  <Route path="/Login" element={<Authpage />} />
-  <Route path="/Howorks" element={<Howorks />} />
-  <Route path="/Foriders" element={<Foriders />} />
-  <Route path="/Help" element={<Help />} />
+      <Route
+        path="/Profileuser"
+        element={
+          <PrivateRoute>
+            <Profileuser />
+          </PrivateRoute>
+        }
+      />
 
-  <Route
-    path="/Profileuser"
-    element={
-      <PrivateRoute>
-        <Profileuser />
-      </PrivateRoute>
-    }
-  />
+      <Route
+        path="/driver/profile"
+        element={
+          <PrivateRoute>
+            <ProfileDriver />
+          </PrivateRoute>
+        }
+      />
 
-  <Route
-    path="/driver/profile"
-    element={
-      <PrivateRoute>
-        <ProfileDriver />
-      </PrivateRoute>
-    }
-  />
+      <Route
+        path="/hacer-pedido"
+        element={
+          <PrivateRoute>
+            <HacerPedido />
+          </PrivateRoute>
+        }
+      />
 
-  <Route
-    path="/hacer-pedido"
-    element={
-      <PrivateRoute>
-        <HacerPedido />
-      </PrivateRoute>
-    }
-  />
+      <Route
+        path="/mis-pedidos"
+        element={
+          <PrivateRoute>
+            <MisPedidos />
+          </PrivateRoute>
+        }
+      />
 
-  <Route
-    path="/mis-pedidos"
-    element={
-      <PrivateRoute>
-        <MisPedidos />
-      </PrivateRoute>
-    }
-  />
+      <Route
+        path="/tracking/:orderId"
+        element={
+          <PrivateRoute>
+            <TrackingPedido />
+          </PrivateRoute>
+        }
+      />
 
-  <Route
-    path="/tracking/:orderId"
-    element={
-      <PrivateRoute>
-        <TrackingPedido />
-      </PrivateRoute>
-    }
-  />
-
-  {/* <Route path="/Stores" element={<Stores />} /> */}
-
-</Route>
+      {/* <Route path="/Stores" element={<Stores />} /> */}
+    </Route>
+  )
+);
