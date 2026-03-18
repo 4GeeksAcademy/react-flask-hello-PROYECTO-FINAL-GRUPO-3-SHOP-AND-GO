@@ -154,3 +154,19 @@ export const createPaymentMethod = async (paymentMethodData) => {
     const data = await response.json();
     return { response, data };
 };
+
+export const createOrder = async (orderData) => {
+    const token = localStorage.getItem("token");
+
+    const response = await fetch(import.meta.env.VITE_BACKEND_URL + "/api/orders", {
+        method: "POST",
+        headers: {
+            "Authorization": "Bearer " + token,
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(orderData)
+    });
+
+    const data = await response.json();
+    return { response, data };
+};

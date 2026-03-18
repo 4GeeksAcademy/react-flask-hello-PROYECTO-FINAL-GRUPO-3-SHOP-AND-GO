@@ -1,12 +1,15 @@
 import { useEffect, useState } from "react";
 import "../hacerpedido.css";
-import { getAddresses, createAddress, getPaymentMethods, createPaymentMethod } from "../Services/authService";
+import { getAddresses, createAddress, getPaymentMethods, createPaymentMethod, createOrder } from "../Services/authService";
+import { useNavigate } from "react-router-dom";
 
 
 const HacerPedido = () => {
     const [addresses, setAddresses] = useState([]);
     const [selectedAddress, setSelectedAddress] = useState(null);
     const [useNewAddress, setUseNewAddress] = useState(false);
+
+    const navigate = useNavigate();
 
     const [stores, setStores] = useState([]);
     const [selectedStore, setSelectedStore] = useState(null);
@@ -119,6 +122,52 @@ const HacerPedido = () => {
         } catch (error) {
             console.log(error);
             alert("Error creando método de pago");
+        }
+    };
+
+    const handleConfirmOrder = async () => {
+        if (!selectedStore) {
+            alert("Selecciona una tienda");
+            return;
+        }
+
+        if (!selectedAddress) {
+            alert("Selecciona una dirección");
+            return;
+        }
+
+        if (!selectedPaymentMethod) {
+            alert("Selecciona un método de pago");
+            return;
+        }
+
+        if (!bagsCount || bagsCount < 1) {
+            alert("El número de bolsas debe ser mayor que 0");
+            return;
+        }
+
+        try {
+            const orderPayload = {
+                store_id: selectedStore.id,
+                address_id: selectedAddress,
+                bags_count: bagsCount,
+                notes: orderDetails
+            };
+
+            const { response, data } = await createOrder(orderPayload);
+
+            if (!response.ok) {
+                console.log("Error creating order:", data);
+                alert(data.error || "No se pudo crear el pedido");
+                return;
+            }
+
+            console.log("Order created:", data);
+            alert("Pedido creado correctamente");
+            navigate("/mis-pedidos");
+        } catch (error) {
+            console.log(error);
+            alert("Error al confirmar el pedido");
         }
     };
 
@@ -463,7 +512,7 @@ const HacerPedido = () => {
                 <p>Coste entrega: €{deliveryPrice.toFixed(2)}</p>
                 <h4>Total: €{deliveryPrice.toFixed(2)}</h4>
 
-                <button>
+                <button onClick={handleConfirmOrder}>
                     Confirmar Pedido
                 </button>
             </aside>
