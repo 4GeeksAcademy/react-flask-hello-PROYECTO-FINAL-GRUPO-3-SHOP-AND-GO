@@ -1041,6 +1041,7 @@ def create_payment():
         return jsonify({"error": "Forbidden"}), 403
 
     try:
+        print("STRIPE PM:", payment_method.stripe_payment_method_id)
         # crear y confirmar el Payment Intent en Stripe
         intent = stripe.PaymentIntent.create(
             amount=order.amount_cents,
@@ -1097,6 +1098,7 @@ def create_payment():
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
+        
 
 
 # ── GET ALL PAYMENTS ───────────────────────────────────────────

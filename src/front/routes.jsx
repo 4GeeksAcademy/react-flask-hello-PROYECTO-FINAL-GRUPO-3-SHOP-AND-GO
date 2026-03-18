@@ -14,7 +14,6 @@ import { Help } from "./pages/Help";
 import { Profileuser } from "./pages/Profileuser";
 import { ProfileDriver } from "./pages/ProfileDriver";
 import HacerPedido from "./pages/HacerPedido";
-import { ProfileDriver } from "./pages/ProfileDriver";
 import { MisPedidos } from "./pages/MisPedidos";
 import { TrackingPedido } from "./pages/TrackingPedido";
 // import { Stores } from "./pages/Stores";
@@ -35,6 +34,8 @@ export const router = createBrowserRouter(
         <Route path="/Profileuser" element={<Profileuser/>}/> {/* Perfil usuario*/}
         <Route path="/driver/profile" element={<ProfileDriver/>}/> {/* URGENTE CAMBIAR RUTA*/}
         <Route path="/hacer-pedido" element={<HacerPedido />} />
+        <Route path="/mis-pedidos" element={<MisPedidos />} />
+        <Route path="/tracking/:orderId" element={<TrackingPedido />} />
         {/* <Route path="/Stores" element={<Stores/>}/> TIENDAS */}
       </Route>
     )
