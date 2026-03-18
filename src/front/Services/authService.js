@@ -48,7 +48,7 @@ export const login = async (user, navigate) => {
 
     // Navegamos según el role seleccionado
     if (user.role === "driver") {
-        navigate("/rider-profile"); //// //========================================
+        navigate("/driver/profile"); //// //========================================
         // URGENTE EDITARRR!!
     } else {
         navigate("/Profileuser");
