@@ -17,6 +17,7 @@ export const ProfileDriver = () => {
   const [editedUser, setEditedUser] = useState({ name: "", email: "", phone: "" });
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [vehicleData, setVehicleData] = useState({ type: "Moto Scooter", plate: "M-1234-BC" });
+  const [profilePhoto, setProfilePhoto] = useState(null);
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -37,9 +38,11 @@ export const ProfileDriver = () => {
         setIsAvailable(userData.is_available);
         setEditedUser({ name: userData.name, email: userData.email, phone: userData.phone });
 
-        // ✅ Cargar datos del vehículo desde localStorage
         const savedVehicle = localStorage.getItem(`vehicle_${userData.id}`);
         if (savedVehicle) setVehicleData(JSON.parse(savedVehicle));
+
+        const savedPhoto = localStorage.getItem(`photo_${userData.id}`);
+        if (savedPhoto) setProfilePhoto(savedPhoto);
 
       } catch (error) {
         navigate("/login");
@@ -109,6 +112,20 @@ export const ProfileDriver = () => {
   const handleSaveVehicle = () => {
     localStorage.setItem(`vehicle_${user.id}`, JSON.stringify(vehicleData));
     triggerToast("✅ Vehículo actualizado correctamente");
+  };
+
+  const handlePhotoUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64 = reader.result;
+      setProfilePhoto(base64);
+      localStorage.setItem(`photo_${user.id}`, base64);
+      triggerToast("✅ Foto actualizada correctamente");
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleDeleteAccount = async () => {
@@ -221,14 +238,37 @@ export const ProfileDriver = () => {
 
           {/* AVATAR */}
           <div style={{ position: "relative", flexShrink: 0 }}>
-            <div style={{
-              width: "100px", height: "100px", borderRadius: "20px",
-              background: "rgba(255,255,255,0.2)", border: "4px solid rgba(255,255,255,0.4)",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: "2.5rem", fontWeight: "800", color: "white"
-            }}>
-              {user.name.charAt(0).toUpperCase()}
+            <div
+              style={{
+                width: "100px", height: "100px", borderRadius: "20px",
+                background: "rgba(255,255,255,0.2)", border: "4px solid rgba(255,255,255,0.4)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                fontSize: "2.5rem", fontWeight: "800", color: "white",
+                overflow: "hidden", position: "relative", cursor: "pointer"
+              }}
+              onClick={() => document.getElementById("photoInput").click()}
+            >
+              {profilePhoto ? (
+                <img src={profilePhoto} alt="perfil" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              ) : (
+                user.name.charAt(0).toUpperCase()
+              )}
+              <div style={{
+                position: "absolute", bottom: 0, left: 0, right: 0,
+                background: "rgba(0,0,0,0.4)", color: "white",
+                fontSize: "0.6rem", textAlign: "center", padding: "0.25rem",
+                fontWeight: "700"
+              }}>
+                📷 Cambiar
+              </div>
             </div>
+            <input
+              id="photoInput"
+              type="file"
+              accept="image/*"
+              style={{ display: "none" }}
+              onChange={handlePhotoUpload}
+            />
             <div style={{
               position: "absolute", bottom: "-10px", left: "50%", transform: "translateX(-50%)",
               background: "#FDE047", color: "#92400e", fontSize: "0.7rem", fontWeight: "800",
