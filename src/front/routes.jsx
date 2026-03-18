@@ -15,6 +15,7 @@ import { Profileuser } from "./pages/Profileuser";
 import HacerPedido from "./pages/HacerPedido";
 import { ProfileDriver } from "./pages/ProfileDriver";
 import { MisPedidos } from "./pages/MisPedidos";
+import { TrackingPedido } from "./pages/TrackingPedido";
 
 export const router = createBrowserRouter(
     createRoutesFromElements(
@@ -29,6 +30,7 @@ export const router = createBrowserRouter(
         <Route path="/driver/profile" element={<ProfileDriver/>}/>
         <Route path="/hacer-pedido" element={<HacerPedido />} />
         <Route path="/mis-pedidos" element={<MisPedidos />} />
+        <Route path="/tracking/:orderId" element={<TrackingPedido />} />
       </Route>
     )
 )

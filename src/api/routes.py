@@ -988,10 +988,7 @@ def delete_store(store_id):
             "details": str(e)
         }), 500
     
-import stripe
-import os
 
-stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 
 # ── POST CREATE PAYMENT (usuario autenticado) ──────────────────
 @api.route('/payments', methods=['POST'])
