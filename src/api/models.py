@@ -159,7 +159,13 @@ class Order(db.Model):
             "driver_name": self.driver.name if self.driver else "Not assigned",
             "store_name": self.store.name if self.store else None,
             "delivery_address": self.address.street if self.address else None,
-            "payment_status": self.payment.status.value if self.payment else "No payment"
+            "payment_status": self.payment.status.value if self.payment else "No payment",
+            "store_address": f"{self.store.street}, {self.store.city}" if self.store else None,
+            "store_latitude": self.store.latitude if self.store else None,
+            "store_longitude": self.store.longitude if self.store else None,
+            "client_address": f"{self.address.street}, {self.address.city}" if self.address else None,
+            "client_latitude": self.address.latitude if self.address else None,
+            "client_longitude": self.address.longitude if self.address else None,
         }
 
 
