@@ -311,3 +311,142 @@
 .new-address:hover {
     background: rgba(139, 92, 246, 0.08);
 }
+
+.payment-methods-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.payment-method-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 16px;
+    background: #fff;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.payment-method-card:hover {
+    border-color: #c4b5fd;
+    background: #fcfbff;
+}
+
+.payment-method-card.active {
+    border: 2px solid #7c3aed;
+    background: #faf7ff;
+}
+
+.payment-method-radio {
+    width: 18px;
+    height: 18px;
+    accent-color: #7c3aed;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.payment-method-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.25;
+}
+
+.payment-method-main {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #111827;
+}
+
+.payment-method-secondary {
+    font-size: 0.95rem;
+    color: #6b7280;
+    margin-top: 2px;
+}
+
+.new-payment-method {
+    display: inline-block;
+    width: fit-content;
+    margin-top: 2px;
+    color: #8b5cf6;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.new-payment-method:hover {
+    color: #6d28d9;
+}
+
+.no-payment-methods {
+    margin: 0 0 8px;
+    color: #6b7280;
+    font-size: 0.95rem;
+}
+.new-item-form {
+    margin-top: 14px;
+    padding: 18px;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    background: #faf7ff;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.new-item-form input {
+    width: 100%;
+    height: 42px;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 0 12px;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.new-item-form input:focus {
+    border-color: #a78bfa;
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+}
+
+.new-item-form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.new-item-form-actions button {
+    flex: 1;
+    height: 40px;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+}
+
+/* Botón guardar */
+.new-item-form-actions button:first-child {
+    background: #7c3aed;
+    color: white;
+}
+
+.new-item-form-actions button:first-child:hover {
+    background: #6d28d9;
+}
+
+/* Botón cancelar */
+.new-item-form-actions button:last-child {
+    background: #f3f4f6;
+    color: #374151;
+}
+
+.new-item-form-actions button:last-child:hover {
+    background: #e5e7eb;
+}

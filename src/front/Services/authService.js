@@ -92,3 +92,65 @@ export const getProfile = async () => {
 
   return data;
 };
+
+export const getAddresses = async () => {
+    const token = localStorage.getItem("token");
+
+    const response = await fetch(import.meta.env.VITE_BACKEND_URL + "/api/addresses", {
+        method: "GET",
+        headers: {
+            "Authorization": "Bearer " + token,
+            "Content-Type": "application/json"
+        }
+    });
+
+    const data = await response.json();
+    return data;
+};
+
+export const createAddress = async (addressData) => {
+    const token = localStorage.getItem("token");
+
+    const response = await fetch(import.meta.env.VITE_BACKEND_URL + "/api/addresses", {
+        method: "POST",
+        headers: {
+            "Authorization": "Bearer " + token,
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(addressData)
+    });
+
+    const data = await response.json();
+    return { response, data };
+};
+
+export const getPaymentMethods = async () => {
+    const token = localStorage.getItem("token");
+
+    const response = await fetch(import.meta.env.VITE_BACKEND_URL + "/api/payment-methods", {
+        method: "GET",
+        headers: {
+            "Authorization": "Bearer " + token,
+            "Content-Type": "application/json"
+        }
+    });
+
+    const data = await response.json();
+    return data;
+};
+
+export const createPaymentMethod = async (paymentMethodData) => {
+    const token = localStorage.getItem("token");
+
+    const response = await fetch(import.meta.env.VITE_BACKEND_URL + "/api/payment-method", {
+        method: "POST",
+        headers: {
+            "Authorization": "Bearer " + token,
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(paymentMethodData)
+    });
+
+    const data = await response.json();
+    return { response, data };
+};
