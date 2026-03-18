@@ -2,7 +2,13 @@
    PÁGINA COMPLETA
    ============================================ */
 .auth-page {
-  background: linear-gradient(135deg, #A855F7 0%, #9333EA 30%, #7C3AED 60%, #6D28D9 100%);
+  background: linear-gradient(
+    135deg,
+    #a855f7 0%,
+    #9333ea 30%,
+    #7c3aed 60%,
+    #6d28d9 100%
+  );
   min-height: 100vh;
   display: flex;
   justify-content: center;
@@ -109,7 +115,12 @@
 
 /* BOTÓN DE SUBMIT */
 .auth-panel button[type="submit"] {
-  background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 50%, #6D28D9 100%) !important;
+  background: linear-gradient(
+    135deg,
+    #8b5cf6 0%,
+    #7c3aed 50%,
+    #6d28d9 100%
+  ) !important;
   color: white;
   padding: 0.625rem 1.75rem !important;
   border-radius: 50px !important;
@@ -123,7 +134,12 @@
 .auth-panel button[type="submit"]:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(139, 92, 246, 0.6);
-  background: linear-gradient(135deg, #9333EA 0%, #8B5CF6 50%, #7C3AED 100%) !important;
+  background: linear-gradient(
+    135deg,
+    #9333ea 0%,
+    #8b5cf6 50%,
+    #7c3aed 100%
+  ) !important;
 }
 
 /* ============================================
@@ -139,7 +155,7 @@
 .auth-panel button[type="button"] {
   background: transparent;
   border: none;
-  color: #FDE047;
+  color: #fde047;
   font-weight: 700;
   cursor: pointer;
   margin-left: 0.5rem;
@@ -187,7 +203,7 @@
 }
 
 .role-btn.active {
-  background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 50%, #6D28D9 100%);
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 50%, #6d28d9 100%);
   border-color: rgba(255, 255, 255, 0.5);
   color: white;
   box-shadow: 0 4px 14px rgba(139, 92, 246, 0.5);
