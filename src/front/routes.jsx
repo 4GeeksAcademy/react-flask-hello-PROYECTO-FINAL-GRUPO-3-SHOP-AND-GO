@@ -12,25 +12,30 @@ import { Howorks } from "./pages/Howorks";
 import { Foriders } from "./pages/Foriders";
 import { Help } from "./pages/Help";
 import { Profileuser } from "./pages/Profileuser";
+import { ProfileDriver } from "./pages/ProfileDriver";
 import HacerPedido from "./pages/HacerPedido";
 import { ProfileDriver } from "./pages/ProfileDriver";
 import { MisPedidos } from "./pages/MisPedidos";
 import { TrackingPedido } from "./pages/TrackingPedido";
+// import { Stores } from "./pages/Stores";
 
 export const router = createBrowserRouter(
     createRoutesFromElements(
       <Route path="/" element={<Layout />} errorElement={<h1>Not found!</h1>} >
-        <Route path="/" element={<Home />} />
-        <Route path="/register" element={<Authpage/>}/>
-        <Route path="/Login" element={<Authpage/>}/>
-        <Route path="/Howorks" element={<Howorks/>}/>
-        <Route path="/Foriders" element={<Foriders/>}/>
-        <Route path="/Help" element={<Help/>}/>
-        <Route path="/Profileuser" element={<Profileuser/>}/>
-        <Route path="/driver/profile" element={<ProfileDriver/>}/>
+
+        {/* Nested Routes: Defines sub-routes within the BaseHome component. */}
+        <Route path= "/" element={<Home />} />
+        {/* <Route path="/single/:theId" element={ <Single />} />  Dynamic route for single items */}
+        {/* <Route path="/demo" element={<Demo />} /> */}
+        <Route path="/register" element={<Authpage/>}/> {/* //Register */}
+        <Route path="/Login" element={<Authpage/>}/> {/* //Login */}
+        <Route path="/Howorks" element={<Howorks/>}/> {/* Cómo funciona*/}
+        <Route path="/Foriders" element={<Foriders/>}/> {/* Para riders*/}
+        <Route path="/Help" element={<Help/>}/> {/* Ayuda*/}
+        <Route path="/Profileuser" element={<Profileuser/>}/> {/* Perfil usuario*/}
+        <Route path="/driver/profile" element={<ProfileDriver/>}/> {/* URGENTE CAMBIAR RUTA*/}
         <Route path="/hacer-pedido" element={<HacerPedido />} />
-        <Route path="/mis-pedidos" element={<MisPedidos />} />
-        <Route path="/tracking/:orderId" element={<TrackingPedido />} />
+        {/* <Route path="/Stores" element={<Stores/>}/> TIENDAS */}
       </Route>
     )
 )

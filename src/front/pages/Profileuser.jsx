@@ -28,7 +28,7 @@ export const Profileuser = () => {
         setUser(userData);
       } catch (error) {
         console.error("Error cargando perfil:", error);
-        navigate("/login");
+        // navigate("/login");
       }
     };
     loadProfile();

@@ -1,116 +1,145 @@
-// Import necessary components from react-router-dom and other parts of the application.
 import { Link } from "react-router-dom";
-import useGlobalReducer from "../hooks/useGlobalReducer";  // Custom hook for accessing the global state.
-import { useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { register, login } from "../Services/authService";
 
 export const Authpage = () => {
-    // Access the global state and dispatch function using the useGlobalReducer hook.
-    //   const { store, dispatch } = useGlobalReducer()
     const navigate = useNavigate();
+
+    const [showLogin, setShowLogin] = useState(true);
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     const [newUser, setNewUser] = useState({
         name: "",
         email: "",
         phone: "",
         password: "",
-        confirmPassword: "", //esto como las webs normales que validan dobles webs...
-
+        confirmPassword: "",
+        role: "user"  // "user" o "driver"
     });
 
-    const [showLogin, setShowLogin] = useState(true); //toggle para mostrar el login, si es falso manda a register
-
-    //   para loguearse si ya tiene usuario ya que se hará en la misma pagina
     const [loginUser, setLoginUser] = useState({
         email: "",
-        password: ""
+        password: "",
+        role: "user"  // "user" o "driver"
     });
 
-    //formulario para crear usuario, actualiza Register
     const handleChange = (e) => {
-        setNewUser({
-            ...newUser,
-            [e.target.name]: e.target.value
-        });
+        setNewUser({ ...newUser, [e.target.name]: e.target.value });
     };
 
-    //formulario para el login, actualiza Login
     const handleLoginChange = (e) => {
-        setLoginUser({
-            ...loginUser,
-            [e.target.name]: e.target.value
-        });
-    }
+        setLoginUser({ ...loginUser, [e.target.name]: e.target.value });
+    };
 
     const handleSubmit = (e) => {
-        e.preventDefault()  //esto evita que se recargue la pagina y, mis datos puedan enviarse al backend y 
-        //que tampoco se muestren en la URL
-        //para validaciones
+        e.preventDefault();
         if (!newUser.name || !newUser.email || !newUser.phone || !newUser.password || !newUser.confirmPassword) {
-            alert("All fields are required")
+            alert("Todos los campos son obligatorios");
             return;
         }
-
         if (newUser.password !== newUser.confirmPassword) {
-            alert("The passwords do not match");
+            alert("Las contraseñas no coinciden");
             return;
         }
-
-        //llamo a mi función en el BACKEND
         register(newUser, navigate);
     };
 
     const handleLoginSubmit = (e) => {
         e.preventDefault();
-
-
-        // Validaciones
         if (!loginUser.email || !loginUser.password) {
-            alert("All fields are required");
+            alert("Todos los campos son obligatorios");
             return;
         }
-
         login(loginUser, navigate);
-
     };
-
 
     return (
         <div className="auth-page">
 
-            {/* WRAPPER */}
             <div className="auth-wrapper">
+                <div className={`auth-slider ${showLogin ? "show-login" : "show-register"}`}>
 
-
-                {/* Container que se desliza */}
-                <div className={`auth-slider ${showLogin ? 'show-login' : 'show-register'}`}>
-
-                    {/* PANEL IZQUIERDO TOGGLE- LOGIN */}
+                    {/* ================================
+                        PANEL LOGIN
+                    ================================ */}
                     <div className="auth-panel login-panel">
+
+                        <div className="auth-logo">
+                            <div className="auth-logo-icon">🚴</div>
+                        </div>
                         <h1>INICIAR SESIÓN 🚀</h1>
+                        <p className="auth-subtitle">Bienvenido de nuevo</p>
+
+                        {/* ROLE SELECTOR LOGIN */}
+                        <div className="role-selector">
+                            <button
+                                type="button"
+                                className={`role-btn ${loginUser.role === "user" ? "active" : ""}`}
+                                onClick={() => setLoginUser({ ...loginUser, role: "user" })}
+                            >
+                                {loginUser.role === "user" && <span className="role-check">✓</span>}
+                                <span className="role-icon">🛍️</span>
+                                <span className="role-title">Soy Usuario</span>
+                                <span className="role-desc">Quiero recibir entregas</span>
+                            </button>
+                            <button
+                                type="button"
+                                className={`role-btn ${loginUser.role === "driver" ? "active" : ""}`}
+                                onClick={() => setLoginUser({ ...loginUser, role: "driver" })}
+                            >
+                                {loginUser.role === "driver" && <span className="role-check">✓</span>}
+                                <span className="role-icon">🚴</span>
+                                <span className="role-title">Soy Rider</span>
+                                <span className="role-desc">Quiero hacer entregas</span>
+                            </button>
+                        </div>
 
                         <form onSubmit={handleLoginSubmit}>
-                            <input
-                                type="email"
-                                name="email"
-                                placeholder="Email"
-                                value={loginUser.email}
-                                onChange={handleLoginChange}
-                            />
+                            <div className="input-group">
+                                <label>Correo Electrónico</label>
+                                <div className="input-wrapper">
+                                    <span className="input-icon">✉️</span>
+                                    <input
+                                        type="email"
+                                        name="email"
+                                        placeholder="tu@email.com"
+                                        value={loginUser.email}
+                                        onChange={handleLoginChange}
+                                    />
+                                </div>
+                            </div>
 
-                            <input
-                                type="password"
-                                name="password"
-                                placeholder="Contraseña"
-                                value={loginUser.password}
-                                onChange={handleLoginChange}
-                            />
+                            <div className="input-group">
+                                <label>Contraseña</label>
+                                <div className="input-wrapper">
+                                    <span className="input-icon">🔒</span>
+                                    <input
+                                        type={showPassword ? "text" : "password"}
+                                        name="password"
+                                        placeholder="••••••••"
+                                        value={loginUser.password}
+                                        onChange={handleLoginChange}
+                                    />
+                                    <button type="button" className="toggle-password" onClick={() => setShowPassword(!showPassword)}>
+                                        {showPassword ? "🙈" : "👁️"}
+                                    </button>
+                                </div>
+                            </div>
 
                             <button type="submit">INICIAR SESIÓN</button>
                         </form>
 
-                        <p>
+                        <div className="auth-divider"><span>O inicia sesión con</span></div>
+
+                        <div className="social-buttons">
+                            <button type="button" className="social-btn">G</button>
+                            <button type="button" className="social-btn">f</button>
+                            <button type="button" className="social-btn">🍎</button>
+                        </div>
+
+                        <p className="auth-toggle-text">
                             ¿No tienes cuenta?
                             <button type="button" onClick={() => setShowLogin(false)}>
                                 Crea tu cuenta aquí
@@ -118,64 +147,139 @@ export const Authpage = () => {
                         </p>
                     </div>
 
-                    {/* PANEL DERECHO TOGGLE- REGISTER */}
+                    {/* ================================
+                        PANEL REGISTER
+                    ================================ */}
                     <div className="auth-panel register-panel">
+
+                        <div className="auth-logo">
+                            <div className="auth-logo-icon">🚴</div>
+                        </div>
                         <h1>CREAR CUENTA 🚀</h1>
+                        <p className="auth-subtitle">Únete a SHOP&GO</p>
+
+                        {/* ROLE SELECTOR REGISTER */}
+                        <div className="role-selector">
+                            <button
+                                type="button"
+                                className={`role-btn ${newUser.role === "user" ? "active" : ""}`}
+                                onClick={() => setNewUser({ ...newUser, role: "user" })}
+                            >
+                                {newUser.role === "user" && <span className="role-check">✓</span>}
+                                <span className="role-icon">🛍️</span>
+                                <span className="role-title">Soy Usuario</span>
+                                <span className="role-desc">Quiero recibir entregas</span>
+                            </button>
+                            <button
+                                type="button"
+                                className={`role-btn ${newUser.role === "driver" ? "active" : ""}`}
+                                onClick={() => setNewUser({ ...newUser, role: "driver" })}
+                            >
+                                {newUser.role === "driver" && <span className="role-check">✓</span>}
+                                <span className="role-icon">🚴</span>
+                                <span className="role-title">Soy Rider</span>
+                                <span className="role-desc">Quiero hacer entregas</span>
+                            </button>
+                        </div>
 
                         <form onSubmit={handleSubmit}>
+                            <div className="input-group">
+                                <label>Nombre Completo</label>
+                                <div className="input-wrapper">
+                                    <span className="input-icon">👤</span>
+                                    <input
+                                        type="text"
+                                        name="name"
+                                        placeholder="Juan Pérez"
+                                        value={newUser.name}
+                                        onChange={handleChange}
+                                    />
+                                </div>
+                            </div>
 
-                            {/* NOMBRE */}
+                            <div className="input-grid">
+                                <div className="input-group">
+                                    <label>Correo Electrónico</label>
+                                    <div className="input-wrapper">
+                                        <span className="input-icon">✉️</span>
+                                        <input
+                                            type="email"
+                                            name="email"
+                                            placeholder="tu@email.com"
+                                            value={newUser.email}
+                                            onChange={handleChange}
+                                        />
+                                    </div>
+                                </div>
+                                <div className="input-group">
+                                    <label>Teléfono</label>
+                                    <div className="input-wrapper">
+                                        <span className="input-icon">📱</span>
+                                        <input
+                                            type="tel"
+                                            name="phone"
+                                            placeholder="+34 612 345 678"
+                                            value={newUser.phone}
+                                            onChange={handleChange}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
 
-                            <input
-                                type="text"
-                                name="name"
-                                placeholder="Nombre completo"
-                                value={newUser.name}
-                                onChange={handleChange}
-                            />
+                            <div className="input-grid">
+                                <div className="input-group">
+                                    <label>Contraseña</label>
+                                    <div className="input-wrapper">
+                                        <span className="input-icon">🔒</span>
+                                        <input
+                                            type={showPassword ? "text" : "password"}
+                                            name="password"
+                                            placeholder="••••••••"
+                                            value={newUser.password}
+                                            onChange={handleChange}
+                                        />
+                                        <button type="button" className="toggle-password" onClick={() => setShowPassword(!showPassword)}>
+                                            {showPassword ? "🙈" : "👁️"}
+                                        </button>
+                                    </div>
+                                </div>
+                                <div className="input-group">
+                                    <label>Confirmar Contraseña</label>
+                                    <div className="input-wrapper">
+                                        <span className="input-icon">🔒</span>
+                                        <input
+                                            type={showConfirmPassword ? "text" : "password"}
+                                            name="confirmPassword"
+                                            placeholder="••••••••"
+                                            value={newUser.confirmPassword}
+                                            onChange={handleChange}
+                                        />
+                                        <button type="button" className="toggle-password" onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
+                                            {showConfirmPassword ? "🙈" : "👁️"}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
 
-                            {/* EMAIL */}
+                            <div className="terms-box">
+                                <input type="checkbox" id="terms" required />
+                                <label htmlFor="terms">
+                                    Acepto los <a href="#">Términos y Condiciones</a> y la <a href="#">Política de Privacidad</a>
+                                </label>
+                            </div>
 
-                            <input
-                                type="email"
-                                name="email"
-                                placeholder="Email"
-                                value={newUser.email}
-                                onChange={handleChange}
-                            />
-
-                            {/* PHONE */}
-
-                            <input
-                                type="tel"
-                                name="phone"
-                                placeholder="Teléfono"
-                                value={newUser.phone}
-                                onChange={handleChange}
-                            />
-                            {/* PASSWORD */}
-
-                            <input
-                                type="password"
-                                name="password"
-                                placeholder="Contraseña"
-                                value={newUser.password}
-                                onChange={handleChange}
-                            />
-                            {/* CONFIRM PASSWORD */}
-
-                            <input
-                                type="password"
-                                name="confirmPassword"
-                                placeholder="Confirmar Contraseña"
-                                value={newUser.confirmPassword}
-                                onChange={handleChange}
-                            />
-
-                            <button type="submit">REGISTRARSE</button>
+                            <button type="submit">CREAR CUENTA</button>
                         </form>
 
-                        <p>
+                        <div className="auth-divider"><span>O regístrate con</span></div>
+
+                        <div className="social-buttons">
+                            <button type="button" className="social-btn">G</button>
+                            <button type="button" className="social-btn">f</button>
+                            <button type="button" className="social-btn">🍎</button>
+                        </div>
+
+                        <p className="auth-toggle-text">
                             ¿Ya tienes cuenta?
                             <button type="button" onClick={() => setShowLogin(true)}>
                                 Volver al Login
@@ -185,7 +289,22 @@ export const Authpage = () => {
 
                 </div>
             </div>
+
+            {/* Benefits */}
+            <div className="auth-benefits">
+                <div className="benefit-item">
+                    <span>📦</span>
+                    <span>Entregas rápidas</span>
+                </div>
+                <div className="benefit-item">
+                    <span>🔒</span>
+                    <span>100% Seguro</span>
+                </div>
+                <div className="benefit-item">
+                    <span>⭐</span>
+                    <span>Mejor calidad</span>
+                </div>
+            </div>
         </div>
     );
 };
-

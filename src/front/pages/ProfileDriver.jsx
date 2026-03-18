@@ -15,6 +15,9 @@ export const ProfileDriver = () => {
   const [activeOrders, setActiveOrders] = useState([]);
   const [historyOrders, setHistoryOrders] = useState([]);
   const [editedUser, setEditedUser] = useState({ name: "", email: "", phone: "" });
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [vehicleData, setVehicleData] = useState({ type: "Moto Scooter", plate: "M-1234-BC" });
+  const [profilePhoto, setProfilePhoto] = useState(null);
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -34,6 +37,13 @@ export const ProfileDriver = () => {
         setUser(userData);
         setIsAvailable(userData.is_available);
         setEditedUser({ name: userData.name, email: userData.email, phone: userData.phone });
+
+        const savedVehicle = localStorage.getItem(`vehicle_${userData.id}`);
+        if (savedVehicle) setVehicleData(JSON.parse(savedVehicle));
+
+        const savedPhoto = localStorage.getItem(`photo_${userData.id}`);
+        if (savedPhoto) setProfilePhoto(savedPhoto);
+
       } catch (error) {
         navigate("/login");
       }
@@ -49,7 +59,7 @@ export const ProfileDriver = () => {
           headers: { "Authorization": `Bearer ${token}` }
         });
         const data = await response.json();
-        setActiveOrders(data.filter(o => ["pending", "accepted", "in_progress"].includes(o.status)));
+        setActiveOrders(data.filter(o => ["pending", "accepted", "in_transit"].includes(o.status)));
         setHistoryOrders(data.filter(o => ["delivered", "cancelled"].includes(o.status)));
       } catch (error) {
         console.error("Error cargando pedidos:", error);
@@ -91,8 +101,43 @@ export const ProfileDriver = () => {
       });
       if (response.ok) {
         const updated = await response.json();
-        setUser(updated);
+        setUser(updated.user);
         triggerToast("✅ Perfil actualizado correctamente");
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleSaveVehicle = () => {
+    localStorage.setItem(`vehicle_${user.id}`, JSON.stringify(vehicleData));
+    triggerToast("✅ Vehículo actualizado correctamente");
+  };
+
+  const handlePhotoUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64 = reader.result;
+      setProfilePhoto(base64);
+      localStorage.setItem(`photo_${user.id}`, base64);
+      triggerToast("✅ Foto actualizada correctamente");
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleDeleteAccount = async () => {
+    try {
+      const token = getToken();
+      const response = await fetch(`${API_URL}/api/users/${user.id}`, {
+        method: "DELETE",
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      if (response.ok) {
+        logout();
+        navigate("/login");
       }
     } catch (error) {
       console.error(error);
@@ -111,9 +156,9 @@ export const ProfileDriver = () => {
         const updated = await response.json();
         if (["delivered", "cancelled"].includes(newStatus)) {
           setActiveOrders(prev => prev.filter(o => o.id !== orderId));
-          setHistoryOrders(prev => [updated, ...prev]);
+          setHistoryOrders(prev => [updated.order, ...prev]);
         } else {
-          setActiveOrders(prev => prev.map(o => o.id === orderId ? updated : o));
+          setActiveOrders(prev => prev.map(o => o.id === orderId ? updated.order : o));
         }
         triggerToast("✅ Estado actualizado");
       }
@@ -122,32 +167,55 @@ export const ProfileDriver = () => {
     }
   };
 
-  const totalEarnings = historyOrders.filter(o => o.status === "delivered").length * 5.50;
+  const deliveredOrders = historyOrders.filter(o => o.status === "delivered");
+  const totalEarnings = deliveredOrders.reduce((sum, o) => sum + (o.amount || 0), 0);
+  const avgEarnings = deliveredOrders.length > 0 ? (totalEarnings / deliveredOrders.length).toFixed(2) : "0.00";
   const successRate = historyOrders.length > 0
-    ? ((historyOrders.filter(o => o.status === "delivered").length / historyOrders.length) * 100).toFixed(1)
+    ? ((deliveredOrders.length / historyOrders.length) * 100).toFixed(1)
     : 0;
+
+  const getWeeklyData = () => {
+    const days = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
+    const weeklyMap = { "Lun": 0, "Mar": 0, "Mié": 0, "Jue": 0, "Vie": 0, "Sáb": 0, "Dom": 0 };
+
+    const today = new Date();
+    const startOfWeek = new Date(today);
+    startOfWeek.setDate(today.getDate() - today.getDay() + 1);
+    startOfWeek.setHours(0, 0, 0, 0);
+
+    deliveredOrders.forEach(order => {
+      const orderDate = new Date(order.created_at);
+      if (orderDate >= startOfWeek) {
+        const dayName = days[orderDate.getDay()];
+        weeklyMap[dayName] += order.amount || 0;
+      }
+    });
+
+    return Object.entries(weeklyMap).map(([day, amount]) => ({ day, amount }));
+  };
+
+  const weeklyData = getWeeklyData();
+  const maxWeekly = Math.max(...weeklyData.map(d => d.amount), 1);
 
   const getStatusLabel = (status) => ({
     pending: "⏳ Pendiente",
     accepted: "✅ Aceptado",
-    in_progress: "🚴 En camino",
+    in_transit: "🚴 En camino",
     delivered: "📦 Entregado",
     cancelled: "❌ Cancelado"
   })[status] || status;
 
-  const getNextStatus = (status) => ({ pending: "accepted", accepted: "in_progress", in_progress: "delivered" })[status];
-  const getNextStatusLabel = (status) => ({ pending: "Aceptar pedido", accepted: "Iniciar entrega", in_progress: "Marcar entregado" })[status];
+  const getNextStatus = (status) => ({
+    pending: "accepted",
+    accepted: "in_transit",
+    in_transit: "delivered"
+  })[status];
 
-  const weeklyData = [
-    { day: "Lun", amount: 22 },
-    { day: "Mar", amount: 35 },
-    { day: "Mié", amount: 18 },
-    { day: "Jue", amount: 42 },
-    { day: "Vie", amount: 55 },
-    { day: "Sáb", amount: 67 },
-    { day: "Dom", amount: 30 },
-  ];
-  const maxWeekly = Math.max(...weeklyData.map(d => d.amount));
+  const getNextStatusLabel = (status) => ({
+    pending: "Aceptar pedido",
+    accepted: "Iniciar entrega",
+    in_transit: "Marcar entregado"
+  })[status];
 
   if (!user) return <div className="loading">Cargando perfil...</div>;
 
@@ -168,23 +236,39 @@ export const ProfileDriver = () => {
           display: "flex", alignItems: "center", gap: "2rem", flexWrap: "wrap"
         }}>
 
-          {/* FOTO */}
+          {/* AVATAR */}
           <div style={{ position: "relative", flexShrink: 0 }}>
-            <div style={{
-              width: "100px", height: "100px", borderRadius: "20px",
-              background: "rgba(255,255,255,0.2)", border: "4px solid rgba(255,255,255,0.4)",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: "2.5rem", fontWeight: "800", color: "white"
-            }}>
-              {user.name.charAt(0).toUpperCase()}
+            <div
+              style={{
+                width: "100px", height: "100px", borderRadius: "20px",
+                background: "rgba(255,255,255,0.2)", border: "4px solid rgba(255,255,255,0.4)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                fontSize: "2.5rem", fontWeight: "800", color: "white",
+                overflow: "hidden", position: "relative", cursor: "pointer"
+              }}
+              onClick={() => document.getElementById("photoInput").click()}
+            >
+              {profilePhoto ? (
+                <img src={profilePhoto} alt="perfil" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              ) : (
+                user.name.charAt(0).toUpperCase()
+              )}
+              <div style={{
+                position: "absolute", bottom: 0, left: 0, right: 0,
+                background: "rgba(0,0,0,0.4)", color: "white",
+                fontSize: "0.6rem", textAlign: "center", padding: "0.25rem",
+                fontWeight: "700"
+              }}>
+                📷 Cambiar
+              </div>
             </div>
-            <div style={{
-              position: "absolute", bottom: "-10px", left: "50%", transform: "translateX(-50%)",
-              background: "#FDE047", color: "#92400e", fontSize: "0.7rem", fontWeight: "800",
-              padding: "0.2rem 0.6rem", borderRadius: "20px", whiteSpace: "nowrap"
-            }}>
-              Rider Elite
-            </div>
+            <input
+              id="photoInput"
+              type="file"
+              accept="image/*"
+              style={{ display: "none" }}
+              onChange={handlePhotoUpload}
+            />
           </div>
 
           {/* INFO */}
@@ -195,16 +279,14 @@ export const ProfileDriver = () => {
             <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "0.75rem", flexWrap: "wrap" }}>
               <span style={{ color: "#FDE047", fontWeight: "700" }}>⭐ 4.8</span>
               <span style={{ color: "rgba(255,255,255,0.8)" }}>•</span>
-              <span style={{ color: "rgba(255,255,255,0.9)" }}>
-                {historyOrders.filter(o => o.status === "delivered").length} entregas
-              </span>
+              <span style={{ color: "rgba(255,255,255,0.9)" }}>{deliveredOrders.length} entregas</span>
               <span style={{ color: "rgba(255,255,255,0.8)" }}>•</span>
               <span style={{ color: "rgba(255,255,255,0.9)" }}>Desde Enero 2025</span>
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
               <span style={{ color: "rgba(255,255,255,0.9)", fontSize: "0.95rem" }}>📞 {user.phone}</span>
               <span style={{ color: "rgba(255,255,255,0.9)", fontSize: "0.95rem" }}>✉️ {user.email}</span>
-              <span style={{ color: "rgba(255,255,255,0.9)", fontSize: "0.95rem" }}>🛵 Moto Scooter</span>
+              <span style={{ color: "rgba(255,255,255,0.9)", fontSize: "0.95rem" }}>🛵 {vehicleData.type} - {vehicleData.plate}</span>
             </div>
           </div>
 
@@ -271,8 +353,8 @@ export const ProfileDriver = () => {
             <div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "1rem", marginBottom: "2rem" }}>
                 {[
-                  { icon: "📦", label: "Hoy", title: activeOrders.length, sub: "Entregas completadas" },
-                  { icon: "€", label: "Hoy", title: `€${totalEarnings.toFixed(2)}`, sub: "Ganancias" },
+                  { icon: "📦", label: "Activos", title: activeOrders.length, sub: "Pedidos activos" },
+                  { icon: "€", label: "Total", title: `€${totalEarnings.toFixed(2)}`, sub: "Ganancias totales" },
                   { icon: "⏱️", label: "Promedio", title: "18min", sub: "Tiempo de entrega" },
                   { icon: "🏆", label: "Tasa", title: `${successRate}%`, sub: "Tasa de éxito" },
                 ].map((card, i) => (
@@ -294,11 +376,11 @@ export const ProfileDriver = () => {
               <div style={{ display: "flex", alignItems: "flex-end", gap: "0.75rem", height: "160px" }}>
                 {weeklyData.map((d, i) => (
                   <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: "0.5rem" }}>
-                    <span style={{ fontSize: "0.75rem", color: "#7C3AED", fontWeight: "700" }}>€{d.amount}</span>
+                    <span style={{ fontSize: "0.75rem", color: "#7C3AED", fontWeight: "700" }}>€{d.amount.toFixed(2)}</span>
                     <div style={{
                       width: "100%", borderRadius: "8px 8px 0 0",
                       background: "linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%)",
-                      height: `${(d.amount / maxWeekly) * 120}px`, opacity: i === 5 ? 1 : 0.6
+                      height: `${(d.amount / maxWeekly) * 120}px`, opacity: 0.7
                     }}></div>
                     <span style={{ fontSize: "0.8rem", color: "#6b7280", fontWeight: "600" }}>{d.day}</span>
                   </div>
@@ -313,6 +395,7 @@ export const ProfileDriver = () => {
                       <div>
                         <div style={{ fontWeight: "800", color: "#7C3AED", marginBottom: "0.5rem" }}>Pedido #{order.id}</div>
                         <div style={{ color: "#6b7280", fontSize: "0.9rem" }}>{getStatusLabel(order.status)}</div>
+                        <div style={{ color: "#9ca3af", fontSize: "0.85rem" }}>🏪 {order.store_name}</div>
                       </div>
                       <div style={{ display: "flex", gap: "0.75rem" }}>
                         {getNextStatus(order.status) && (
@@ -341,11 +424,12 @@ export const ProfileDriver = () => {
                 historyOrders.map(order => (
                   <div key={order.id} style={{ border: "2px solid #f3f4f6", borderRadius: "16px", padding: "1.5rem", marginBottom: "1rem", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "1rem" }}>
                     <div>
-                      <div style={{ fontWeight: "800", color: "#7C3AED", marginBottom: "0.5rem" }}>Pedido #{order.id}</div>
+                      <div style={{ fontWeight: "800", color: "#7C3AED", marginBottom: "0.25rem" }}>Pedido #{order.id}</div>
                       <div style={{ color: "#6b7280", fontSize: "0.9rem" }}>{getStatusLabel(order.status)}</div>
+                      <div style={{ color: "#9ca3af", fontSize: "0.85rem" }}>🏪 {order.store_name} • 📅 {order.created_at}</div>
                     </div>
                     {order.status === "delivered" && (
-                      <span style={{ fontSize: "1.5rem", fontWeight: "800", color: "#10b981" }}>+€5.50</span>
+                      <span style={{ fontSize: "1.5rem", fontWeight: "800", color: "#10b981" }}>+€{order.amount.toFixed(2)}</span>
                     )}
                   </div>
                 ))
@@ -360,8 +444,8 @@ export const ProfileDriver = () => {
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "1rem", marginBottom: "2rem" }}>
                 {[
                   { label: "Total acumulado", value: `€${totalEarnings.toFixed(2)}`, bg: "linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%)" },
-                  { label: "Entregas completadas", value: historyOrders.filter(o => o.status === "delivered").length, bg: "linear-gradient(135deg, #10b981 0%, #059669 100%)" },
-                  { label: "Por entrega", value: "€5.50", bg: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)" },
+                  { label: "Entregas completadas", value: deliveredOrders.length, bg: "linear-gradient(135deg, #10b981 0%, #059669 100%)" },
+                  { label: "Promedio por entrega", value: `€${avgEarnings}`, bg: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)" },
                 ].map((card, i) => (
                   <div key={i} style={{ background: card.bg, borderRadius: "20px", padding: "1.5rem", color: "white", textAlign: "center" }}>
                     <div style={{ fontSize: "2.5rem", fontWeight: "800" }}>{card.value}</div>
@@ -369,16 +453,21 @@ export const ProfileDriver = () => {
                   </div>
                 ))}
               </div>
+
               <h3 style={{ color: "#1f2937", fontWeight: "800", marginBottom: "1rem" }}>Últimas ganancias</h3>
-              {historyOrders.filter(o => o.status === "delivered").slice(0, 10).map(order => (
-                <div key={order.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "1rem", borderBottom: "1px solid #f3f4f6" }}>
-                  <div>
-                    <div style={{ fontWeight: "700", color: "#374151" }}>Pedido #{order.id}</div>
-                    <div style={{ color: "#9ca3af", fontSize: "0.85rem" }}>Entregado</div>
+              {deliveredOrders.length === 0 ? (
+                <p style={{ color: "#9ca3af", textAlign: "center", padding: "2rem" }}>No tienes ganancias aún</p>
+              ) : (
+                deliveredOrders.slice(0, 10).map(order => (
+                  <div key={order.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "1rem", borderBottom: "1px solid #f3f4f6" }}>
+                    <div>
+                      <div style={{ fontWeight: "700", color: "#374151" }}>Pedido #{order.id}</div>
+                      <div style={{ color: "#9ca3af", fontSize: "0.85rem" }}>🏪 {order.store_name} • 📅 {order.created_at}</div>
+                    </div>
+                    <span style={{ color: "#10b981", fontWeight: "800", fontSize: "1.1rem" }}>+€{order.amount.toFixed(2)}</span>
                   </div>
-                  <span style={{ color: "#10b981", fontWeight: "800", fontSize: "1.1rem" }}>+€5.50</span>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           )}
 
@@ -417,18 +506,37 @@ export const ProfileDriver = () => {
               {/* INFORMACIÓN DEL VEHÍCULO */}
               <div style={{ border: "2px solid #f3f4f6", borderRadius: "16px", padding: "2rem", marginBottom: "1.5rem" }}>
                 <h3 style={{ color: "#7C3AED", fontWeight: "700", marginBottom: "1.5rem" }}>🛵 Información del Vehículo</h3>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
-                  <div>
-                    <label style={{ display: "block", color: "#6b7280", fontSize: "0.85rem", marginBottom: "0.5rem" }}>Tipo de vehículo</label>
-                    <input type="text" defaultValue="Moto Scooter" readOnly
-                      style={{ width: "100%", padding: "0.875rem 1rem", border: "2px solid #e5e7eb", borderRadius: "12px", fontSize: "1rem", boxSizing: "border-box", color: "#374151", background: "#f9fafb" }} />
+                <form onSubmit={(e) => { e.preventDefault(); handleSaveVehicle(); }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", marginBottom: "1.25rem" }}>
+                    <div>
+                      <label style={{ display: "block", color: "#6b7280", fontSize: "0.85rem", marginBottom: "0.5rem" }}>Tipo de vehículo</label>
+                      <select
+                        value={vehicleData.type}
+                        onChange={(e) => setVehicleData({ ...vehicleData, type: e.target.value })}
+                        style={{ width: "100%", padding: "0.875rem 1rem", border: "2px solid #e5e7eb", borderRadius: "12px", fontSize: "1rem", boxSizing: "border-box", color: "#374151", background: "white" }}
+                      >
+                        <option value="Moto Scooter">Moto Scooter</option>
+                        <option value="Bicicleta">Bicicleta</option>
+                        <option value="Coche">Coche</option>
+                        <option value="Bicicleta eléctrica">Bicicleta eléctrica</option>
+                        <option value="Moto">Moto</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label style={{ display: "block", color: "#6b7280", fontSize: "0.85rem", marginBottom: "0.5rem" }}>Matrícula</label>
+                      <input
+                        type="text"
+                        value={vehicleData.plate}
+                        onChange={(e) => setVehicleData({ ...vehicleData, plate: e.target.value })}
+                        placeholder="Ej: M-1234-BC"
+                        style={{ width: "100%", padding: "0.875rem 1rem", border: "2px solid #e5e7eb", borderRadius: "12px", fontSize: "1rem", boxSizing: "border-box", color: "#374151" }}
+                      />
+                    </div>
                   </div>
-                  <div>
-                    <label style={{ display: "block", color: "#6b7280", fontSize: "0.85rem", marginBottom: "0.5rem" }}>Matrícula</label>
-                    <input type="text" defaultValue="M-1234-BC" readOnly
-                      style={{ width: "100%", padding: "0.875rem 1rem", border: "2px solid #e5e7eb", borderRadius: "12px", fontSize: "1rem", boxSizing: "border-box", color: "#374151", background: "#f9fafb" }} />
-                  </div>
-                </div>
+                  <button type="submit" style={{ background: "linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%)", color: "white", border: "none", padding: "0.875rem 2rem", borderRadius: "12px", fontWeight: "700", cursor: "pointer" }}>
+                    Guardar Vehículo
+                  </button>
+                </form>
               </div>
 
               {/* DOCUMENTACIÓN */}
@@ -449,11 +557,22 @@ export const ProfileDriver = () => {
                 ))}
               </div>
 
-              {/* CERRAR SESIÓN */}
+              {/* CERRAR SESIÓN Y ELIMINAR CUENTA */}
               <div style={{ border: "2px solid #f3f4f6", borderRadius: "16px", padding: "2rem" }}>
                 <h3 style={{ color: "#374151", fontWeight: "700", marginBottom: "1rem" }}>Sesión</h3>
-                <button onClick={() => { logout(); navigate("/login"); }} style={{ background: "#fee2e2", color: "#991b1b", border: "2px solid #fca5a5", padding: "1rem 2rem", borderRadius: "12px", fontWeight: "700", cursor: "pointer", width: "100%" }}>
+                <button onClick={() => { logout(); navigate("/login"); }} style={{
+                  background: "#fee2e2", color: "#991b1b", border: "2px solid #fca5a5",
+                  padding: "1rem 2rem", borderRadius: "12px", fontWeight: "700",
+                  cursor: "pointer", width: "100%", marginBottom: "1rem"
+                }}>
                   🚪 Cerrar Sesión
+                </button>
+                <button onClick={() => setShowDeleteModal(true)} style={{
+                  background: "white", color: "#dc2626", border: "2px solid #dc2626",
+                  padding: "1rem 2rem", borderRadius: "12px", fontWeight: "700",
+                  cursor: "pointer", width: "100%"
+                }}>
+                  🗑️ Eliminar Cuenta
                 </button>
               </div>
             </div>
@@ -461,6 +580,43 @@ export const ProfileDriver = () => {
 
         </div>
       </div>
+
+      {/* MODAL ELIMINAR CUENTA */}
+      {showDeleteModal && (
+        <div style={{
+          position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
+          background: "rgba(0,0,0,0.7)", backdropFilter: "blur(8px)",
+          display: "flex", justifyContent: "center", alignItems: "center", zIndex: 1000
+        }}>
+          <div style={{
+            background: "white", borderRadius: "24px", padding: "2rem",
+            maxWidth: "400px", width: "90%", textAlign: "center",
+            boxShadow: "0 24px 48px rgba(0,0,0,0.3)"
+          }}>
+            <div style={{ fontSize: "3rem", marginBottom: "1rem" }}>⚠️</div>
+            <h2 style={{ color: "#374151", fontWeight: "800", marginBottom: "0.75rem" }}>
+              ¿Eliminar cuenta?
+            </h2>
+            <p style={{ color: "#6b7280", marginBottom: "2rem", lineHeight: "1.6" }}>
+              Esta acción es irreversible. Se eliminarán todos tus datos permanentemente.
+            </p>
+            <div style={{ display: "flex", gap: "1rem" }}>
+              <button onClick={() => setShowDeleteModal(false)} style={{
+                flex: 1, padding: "1rem", borderRadius: "12px", border: "none",
+                background: "#f3f4f6", color: "#6b7280", fontWeight: "700", cursor: "pointer"
+              }}>
+                Cancelar
+              </button>
+              <button onClick={handleDeleteAccount} style={{
+                flex: 1, padding: "1rem", borderRadius: "12px", border: "none",
+                background: "#dc2626", color: "white", fontWeight: "700", cursor: "pointer"
+              }}>
+                Sí, eliminar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* TOAST */}
       {showToast && (
@@ -470,4 +626,4 @@ export const ProfileDriver = () => {
       )}
     </div>
   );
-};
+}
