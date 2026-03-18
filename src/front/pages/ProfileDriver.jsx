@@ -269,13 +269,6 @@ export const ProfileDriver = () => {
               style={{ display: "none" }}
               onChange={handlePhotoUpload}
             />
-            <div style={{
-              position: "absolute", bottom: "-10px", left: "50%", transform: "translateX(-50%)",
-              background: "#FDE047", color: "#92400e", fontSize: "0.7rem", fontWeight: "800",
-              padding: "0.2rem 0.6rem", borderRadius: "20px", whiteSpace: "nowrap"
-            }}>
-              Rider Elite
-            </div>
           </div>
 
           {/* INFO */}
