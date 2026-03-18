@@ -1090,7 +1090,8 @@ def create_payment():
     except stripe.error.StripeError as e:
         return jsonify({
             "error": "Stripe error",
-            "details": str(e)
+            "details": str(e),
+            "payment_method_id": payment_method.stripe_payment_method_id
         }), 400
 
     except Exception as e:
