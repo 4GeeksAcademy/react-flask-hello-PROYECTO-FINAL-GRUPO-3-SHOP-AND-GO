@@ -1,0 +1,181 @@
+.mis-pedidos-container {
+  min-height: 100vh;
+  background: #f6f7fb;
+  padding: 40px 20px;
+}
+
+.mis-pedidos-wrapper {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.mis-pedidos-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #222;
+  margin-bottom: 8px;
+}
+
+.mis-pedidos-subtitle {
+  color: #6c757d;
+  margin-bottom: 28px;
+}
+
+.orders-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.order-card {
+  background: white;
+  border-radius: 18px;
+  padding: 22px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  border: 1px solid #ececec;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.order-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+}
+
+.order-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  gap: 12px;
+}
+
+.order-id {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #222;
+  margin: 0;
+}
+
+.order-status {
+  padding: 7px 14px;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.order-status.pending {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.order-status.in_progress {
+  background: #d1ecf1;
+  color: #0c5460;
+}
+
+.order-status.delivered {
+  background: #d4edda;
+  color: #155724;
+}
+
+.order-status.cancelled {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.order-details {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.order-detail-box {
+  background: #f8f9fc;
+  border-radius: 12px;
+  padding: 14px;
+  border: 1px solid #eef0f4;
+}
+
+.order-detail-label {
+  display: block;
+  font-size: 0.85rem;
+  color: #6c757d;
+  margin-bottom: 4px;
+}
+
+.order-detail-value {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #222;
+}
+
+.empty-orders {
+  background: white;
+  border-radius: 18px;
+  padding: 40px 20px;
+  text-align: center;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  border: 1px solid #ececec;
+}
+
+.empty-orders h3 {
+  margin-bottom: 10px;
+  color: #222;
+}
+
+.empty-orders p {
+  margin: 0;
+  color: #6c757d;
+}
+
+@media (max-width: 768px) {
+  .order-card-top {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .order-details {
+    grid-template-columns: 1fr;
+  }
+
+  .mis-pedidos-title {
+    font-size: 1.6rem;
+  }
+}
+
+.tracking-btn {
+  margin-top: 18px;
+  border: none;
+  background: linear-gradient(135deg, #7c3aed, #9333ea);
+  color: white;
+  padding: 10px 18px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 6px 16px rgba(124, 58, 237, 0.25);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+
+.tracking-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px rgba(124, 58, 237, 0.35);
+  background: linear-gradient(135deg, #6d28d9, #7e22ce);
+}
+
+
+.tracking-btn:active {
+  transform: scale(0.97);
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.25);
+}
+
+
+.tracking-btn::before {
+  content: "📍";
+  font-size: 1rem;
+}
