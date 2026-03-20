@@ -137,108 +137,110 @@ export const TrackingPedido = () => {
     if (loading) return <p className="tracking-loading">Cargando seguimiento...</p>;
     if (!order) return <p className="tracking-loading">No se pudo cargar el pedido.</p>;
     console.log("routeCoords:", routeCoords);
-    return (
-        <div className="tracking-container">
-            <div className="tracking-card">
-                <div className="tracking-header-row">
-                    <div>
-                        <h1 className="tracking-title">Seguimiento del pedido #{order.id}</h1>
-                        <p className="tracking-subtitle">
-                            {stepLabels[order.status] || order.status}
-                        </p>
-                    </div>
-
-                    <div className="tracking-eta-box">
-                        <span className="tracking-detail-label">ETA</span>
-                        <strong className="tracking-eta-value">
-                            {order.status === "delivered"
-                                ? "Entregado"
-                                : order.status === "cancelled"
-                                    ? "Cancelado"
-                                    : eta
-                                        ? `${eta} min`
-                                        : "Calculando..."}
-                        </strong>
-                    </div>
+   return (
+    <div className="tracking-container">
+        <div className="tracking-card">
+            <div className="tracking-header-row">
+                <div className="tracking-header-text">
+                    <h1 className="tracking-title">Seguimiento del pedido #{order.id}</h1>
+                    <p className="tracking-subtitle">
+                        {stepLabels[order.status] || order.status}
+                    </p>
                 </div>
 
-                <div className="tracking-map-wrapper">
-                    <MapContainer
-                        center={mapCenter}
-                        zoom={13}
-                        scrollWheelZoom={true}
-                        className="tracking-map"
-                    >
-                        <TileLayer
-                            url={`https://maps.geoapify.com/v1/tile/osm-carto/{z}/{x}/{y}.png?apiKey=${apiKey}`}
-                            attribution='&copy; OpenStreetMap contributors &copy; Geoapify'
+                <div className="tracking-eta-box">
+                    <span className="tracking-detail-label">ETA</span>
+                    <strong className="tracking-eta-value">
+                        {order.status === "delivered"
+                            ? "Entregado"
+                            : order.status === "cancelled"
+                                ? "Cancelado"
+                                : eta
+                                    ? `${eta} min`
+                                    : "Calculando..."}
+                    </strong>
+                </div>
+            </div>
+
+            <div className="tracking-map-wrapper">
+                <MapContainer
+                    center={mapCenter}
+                    zoom={13}
+                    scrollWheelZoom={true}
+                    className="tracking-map"
+                >
+                    <TileLayer
+                        url={`https://maps.geoapify.com/v1/tile/osm-carto/{z}/{x}/{y}.png?apiKey=${apiKey}`}
+                        attribution='&copy; OpenStreetMap contributors &copy; Geoapify'
+                    />
+
+                    {order?.store_latitude && order?.store_longitude && (
+                        <Marker position={[order.store_latitude, order.store_longitude]}>
+                            <Popup>
+                                <strong>{order.store_name}</strong>
+                                <br />
+                                {order.store_address}
+                            </Popup>
+                        </Marker>
+                    )}
+
+                    {order?.client_latitude && order?.client_longitude && (
+                        <Marker position={[order.client_latitude, order.client_longitude]}>
+                            <Popup>
+                                <strong>{order.client_name}</strong>
+                                <br />
+                                {order.client_address}
+                            </Popup>
+                        </Marker>
+                    )}
+
+                    {routeCoords.length > 0 && (
+                        <Polyline
+                            positions={routeCoords}
+                            pathOptions={{ color: "blue", weight: 6, opacity: 1 }}
                         />
+                    )}
+                </MapContainer>
+            </div>
 
-                        {order?.store_latitude && order?.store_longitude && (
-                            <Marker position={[order.store_latitude, order.store_longitude]}>
-                                <Popup>
-                                    <strong>{order.store_name}</strong>
-                                    <br />
-                                    {order.store_address}
-                                </Popup>
-                            </Marker>
-                        )}
-
-                        {order?.client_latitude && order?.client_longitude && (
-                            <Marker position={[order.client_latitude, order.client_longitude]}>
-                                <Popup>
-                                    <strong>{order.client_name}</strong>
-                                    <br />
-                                    {order.client_address}
-                                </Popup>
-                            </Marker>
-                        )}
-
-                        {routeCoords.length > 0 && (
-                            <Polyline
-                                positions={routeCoords}
-                                pathOptions={{ color: "blue", weight: 6, opacity: 1 }}
-                            />
-                        )}
-                    </MapContainer>
+            <div className="tracking-details-grid">
+                <div className="tracking-detail-box tracking-detail-box-wide">
+                    <span className="tracking-detail-label">Tienda</span>
+                    <span className="tracking-detail-value">{order.store_name}</span>
+                    <p className="tracking-detail-subvalue">{order.store_address}</p>
                 </div>
 
-                <div className="tracking-details-grid">
-                    <div className="tracking-detail-box">
-                        <span className="tracking-detail-label">Tienda</span>
-                        <span className="tracking-detail-value">{order.store_name}</span>
-                        <p className="tracking-detail-subvalue">{order.store_address}</p>
-                    </div>
+                <div className="tracking-detail-box tracking-detail-box-wide">
+                    <span className="tracking-detail-label">Cliente</span>
+                    <span className="tracking-detail-value">{order.client_name}</span>
+                    <p className="tracking-detail-subvalue">{order.client_address}</p>
+                </div>
 
-                    <div className="tracking-detail-box">
-                        <span className="tracking-detail-label">Cliente</span>
-                        <span className="tracking-detail-value">{order.client_name}</span>
-                        <p className="tracking-detail-subvalue">{order.client_address}</p>
-                    </div>
+                <div className="tracking-detail-box">
+                    <span className="tracking-detail-label">Rider</span>
+                    <span className="tracking-detail-value">
+                        {order.driver_name || "Sin asignar"}
+                    </span>
+                </div>
 
-                    <div className="tracking-detail-box">
-                        <span className="tracking-detail-label">Rider</span>
-                        <span className="tracking-detail-value">{order.driver_name}</span>
-                    </div>
+                <div className="tracking-detail-box">
+                    <span className="tracking-detail-label">Pago</span>
+                    <span className="tracking-detail-value">{order.payment_status}</span>
+                </div>
 
-                    <div className="tracking-detail-box">
-                        <span className="tracking-detail-label">Pago</span>
-                        <span className="tracking-detail-value">{order.payment_status}</span>
-                    </div>
+                <div className="tracking-detail-box">
+                    <span className="tracking-detail-label">Estado</span>
+                    <span className="tracking-detail-value">
+                        {stepLabels[order.status] || order.status}
+                    </span>
+                </div>
 
-                    <div className="tracking-detail-box">
-                        <span className="tracking-detail-label">Estado</span>
-                        <span className="tracking-detail-value">
-                            {stepLabels[order.status] || order.status}
-                        </span>
-                    </div>
-
-                    <div className="tracking-detail-box">
-                        <span className="tracking-detail-label">Creado</span>
-                        <span className="tracking-detail-value">{order.created_at}</span>
-                    </div>
+                <div className="tracking-detail-box">
+                    <span className="tracking-detail-label">Creado</span>
+                    <span className="tracking-detail-value">{order.created_at}</span>
                 </div>
             </div>
         </div>
-    );
+    </div>
+);
 };
