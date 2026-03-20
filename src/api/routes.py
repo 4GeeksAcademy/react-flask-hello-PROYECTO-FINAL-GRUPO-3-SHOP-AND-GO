@@ -1086,8 +1086,6 @@ def create_payment():
         }), 402
 
     except stripe.error.StripeError as e:
-        print("STRIPE ERROR:", str(e))
-        print("STRIPE USER MESSAGE:", getattr(e, "user_message", None))
         return jsonify({
             "error": "Stripe error",
             "details": str(e),
