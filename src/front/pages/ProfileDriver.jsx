@@ -217,7 +217,7 @@ export const ProfileDriver = () => {
     in_transit: "Marcar entregado"
   })[status];
 
-  if (!user) return <div className="loading">Cargando perfil...</div>;
+  if (!user) return <div style={{ minHeight: "80vh" }}></div>;
 
   return (
     <div style={{ background: "#f9fafb", minHeight: "100vh", padding: "2rem 1rem" }}>

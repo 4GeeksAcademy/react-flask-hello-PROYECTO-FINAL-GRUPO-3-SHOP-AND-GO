@@ -17,67 +17,52 @@ import HacerPedido from "./pages/HacerPedido";
 import { MisPedidos } from "./pages/MisPedidos";
 import { TrackingPedido } from "./pages/TrackingPedido";
 import { PrivateRoute } from "./components/PrivateRoute";
+import { Stores } from "./pages/Stores";
 // import { Stores } from "./pages/Stores";
 
 export const router = createBrowserRouter(
-  createRoutesFromElements(
-    <Route path="/" element={<Layout />} errorElement={<h1>Not found!</h1>}>
-      <Route path="/" element={<Home />} />
-      {/* <Route path="/single/:theId" element={<Single />} /> */}
-      {/* <Route path="/demo" element={<Demo />} /> */}
-
-      <Route path="/register" element={<Authpage />} />
-      <Route path="/Login" element={<Authpage />} />
-      <Route path="/Howorks" element={<Howorks />} />
-      <Route path="/Foriders" element={<Foriders />} />
-      <Route path="/Help" element={<Help />} />
-
-      <Route
-        path="/Profileuser"
-        element={
-          <PrivateRoute>
+    createRoutesFromElements(
+      <Route path="/" element={<Layout />} errorElement={<h1>Not found!</h1>} >
+ 
+        {/* Rutas públicas */}
+        <Route path="/" element={<Home />} />
+        <Route path="/register" element={<Authpage />} />
+        <Route path="/Login" element={<Authpage />} />
+        <Route path="/Howorks" element={<Howorks />} />
+        <Route path="/Foriders" element={<Foriders />} />
+        <Route path="/Help" element={<Help />} />
+        <Route path="/Stores" element={<Stores />} />
+ 
+        {/* Rutas protegidas - solo USUARIO */}
+        <Route path="/Profileuser" element={
+          <PrivateRoute allowedRoles={["user"]}>
             <Profileuser />
           </PrivateRoute>
-        }
-      />
-
-      <Route
-        path="/driver/profile"
-        element={
-          <PrivateRoute>
-            <ProfileDriver />
-          </PrivateRoute>
-        }
-      />
-
-      <Route
-        path="/hacer-pedido"
-        element={
-          <PrivateRoute>
+        } />
+        <Route path="/hacer-pedido" element={
+          <PrivateRoute allowedRoles={["user"]}>
             <HacerPedido />
           </PrivateRoute>
-        }
-      />
-
-      <Route
-        path="/mis-pedidos"
-        element={
-          <PrivateRoute>
+        } />
+        <Route path="/mis-pedidos" element={
+          <PrivateRoute allowedRoles={["user"]}>
             <MisPedidos />
           </PrivateRoute>
-        }
-      />
-
-      <Route
-        path="/tracking/:orderId"
-        element={
-          <PrivateRoute>
+        } />
+        <Route path="/tracking/:orderId" element={
+          <PrivateRoute allowedRoles={["user"]}>
             <TrackingPedido />
           </PrivateRoute>
-        }
-      />
-
-      {/* <Route path="/Stores" element={<Stores />} /> */}
-    </Route>
-  )
-);
+        } />
+ 
+        {/* Rutas protegidas - solo DRIVER */}
+        <Route path="/driver/profile" element={
+          <PrivateRoute allowedRoles={["driver"]}>
+            <ProfileDriver />
+          </PrivateRoute>
+        } />
+ 
+      </Route>
+    )
+);  
+      /* <Route path="/Stores" element={<Stores />} /> */
