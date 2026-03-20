@@ -145,7 +145,7 @@ class Order(db.Model):
     driver: Mapped["User"] = relationship(back_populates="deliveries", foreign_keys=[driver_id])
     store: Mapped["Store"] = relationship(back_populates="orders")
     address: Mapped["Address"] = relationship(back_populates="orders")
-    payment: Mapped["Payment"] = relationship(back_populates="order", uselist=False)
+    payment: Mapped["Payment"] = relationship(back_populates="order", cascade="all, delete-orphan")
 
     def serialize(self):
         return {
@@ -159,7 +159,13 @@ class Order(db.Model):
             "driver_name": self.driver.name if self.driver else "Not assigned",
             "store_name": self.store.name if self.store else None,
             "delivery_address": self.address.street if self.address else None,
-            "payment_status": self.payment.status.value if self.payment else "No payment"
+            "payment_status": self.payment.status.value if self.payment else "No payment",
+            "store_address": f"{self.store.street}, {self.store.city}" if self.store else None,
+            "store_latitude": self.store.latitude if self.store else None,
+            "store_longitude": self.store.longitude if self.store else None,
+            "client_address": f"{self.address.street}, {self.address.city}" if self.address else None,
+            "client_latitude": self.address.latitude if self.address else None,
+            "client_longitude": self.address.longitude if self.address else None,
         }
 
 
@@ -204,7 +210,7 @@ class Payment(db.Model):
     stripe_session_id: Mapped[str] = mapped_column(String(200), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc))
 
-    order_id: Mapped[int] = mapped_column(ForeignKey("orders.id"), unique=True)
+    order_id: Mapped[int] = mapped_column(ForeignKey("orders.id"), nullable=False)
     payment_method_id: Mapped[int] = mapped_column(ForeignKey("payment_methods.id"), nullable=True)
 
     order: Mapped["Order"] = relationship(back_populates="payment")

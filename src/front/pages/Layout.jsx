@@ -10,8 +10,10 @@ export const Layout = () => {
     return (
         <ScrollToTop>
             <Navbar />
+            <div style={{ minHeight: "80vh" }}>
+                <Outlet />
+            </div>
             {/* <Jumbotron/> */}
-            <Outlet />
             <Footer />
         </ScrollToTop>
     )

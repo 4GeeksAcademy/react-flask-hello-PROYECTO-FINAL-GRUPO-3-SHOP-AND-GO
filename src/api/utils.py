@@ -1,7 +1,6 @@
 from flask import jsonify, url_for
 import os
 import requests, math
-print("API KEY:", os.getenv("GEOAPIFY_API_KEY"))
 class APIException(Exception):
     status_code = 400
 
@@ -48,7 +47,7 @@ def generate_sitemap(app):
 
 
 def geoapify_forward_geocode(street, city, postal_code):
-    api_key = os.getenv("GEOAPIFY_API_KEY")
+    api_key = os.getenv("VITE_GEOAPIFY_API_KEY")
 
     text = f"{street}, {city}, {postal_code}"
 

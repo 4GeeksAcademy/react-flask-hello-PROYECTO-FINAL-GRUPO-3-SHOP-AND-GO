@@ -10,15 +10,16 @@
    ============================================ */
 .howorks-hero {
   background: linear-gradient(135deg, #A855F7 0%, #9333EA 30%, #7C3AED 60%, #6D28D9 100%);
-  padding: 4rem 2rem;
+  padding: 5rem 2rem;
   text-align: center;
   color: white;
 }
 
 .howorks-hero-title {
-  font-size: 2.5rem;
-  font-weight: 800;
+  font-size: 3rem;
+  font-weight: 900;
   margin-bottom: 1rem;
+  text-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .howorks-hero-title .highlight {
@@ -26,9 +27,12 @@
 }
 
 .howorks-hero-subtitle {
-  font-size: 1.2rem;
-  margin-bottom: 2rem;
+  font-size: 1.25rem;
+  margin-bottom: 2.5rem;
   opacity: 0.9;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .howorks-hero-buttons {
@@ -45,12 +49,17 @@
   border: none;
   border-radius: 50px;
   font-weight: 700;
+  font-size: 1rem;
   cursor: pointer;
-  transition: transform 0.3s ease;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
 }
 
 .btn-primary:hover {
-  transform: scale(1.05);
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+  color: #7C3AED;
 }
 
 .btn-secondary {
@@ -60,39 +69,218 @@
   border: 2px solid white;
   border-radius: 50px;
   font-weight: 700;
+  font-size: 1rem;
   cursor: pointer;
   transition: all 0.3s ease;
+  text-decoration: none;
 }
 
 .btn-secondary:hover {
   background: white;
   color: #7C3AED;
+  transform: translateY(-3px);
 }
 
 /* ============================================
-   SECCIÓN DE PASOS
+   SECCIÓN PARA USUARIOS
    ============================================ */
-.howorks-steps {
-  padding: 4rem 2rem;
-  max-width: 1200px;
+.howorks-section {
+  padding: 5rem 2rem;
+  max-width: 1100px;
   margin: 0 auto;
 }
 
-.step {
-  margin-bottom: 3rem;
+.section-title {
+  text-align: center;
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: #1F2937;
+  margin-bottom: 0.5rem;
 }
 
-.step h2 {
-  font-size: 2rem;
-  color: #7C3AED;
-  margin-bottom: 1rem;
-  font-weight: 700;
-}
-
-.step p {
-  color: #666;
+.section-subtitle {
+  text-align: center;
   font-size: 1.1rem;
-  line-height: 1.6;
+  color: #6B7280;
+  margin-bottom: 4rem;
+}
+
+/* ============================================
+   PASOS ALTERNADOS
+   ============================================ */
+.steps-alternating {
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+}
+
+.step-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2.5rem;
+  align-items: center;
+  animation: fadeInUp 0.6s ease both;
+}
+
+.step-row:nth-child(1) { animation-delay: 0.1s; }
+.step-row:nth-child(2) { animation-delay: 0.2s; }
+.step-row:nth-child(3) { animation-delay: 0.3s; }
+.step-row:nth-child(4) { animation-delay: 0.4s; }
+
+.step-row-reverse {
+  direction: rtl;
+}
+
+.step-row-reverse > * {
+  direction: ltr;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================================
+   LADO TEXTO
+   ============================================ */
+.step-text-side {
+  position: relative;
+  padding: 1rem 0;
+}
+
+.step-number {
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(135deg, #FBBF24, #F59E0B);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 1.2rem;
+  color: white;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+  margin-bottom: 1rem;
+}
+
+.step-icon-small {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #8B5CF6, #A855F7);
+  border-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  box-shadow: 0 4px 14px rgba(139, 92, 246, 0.3);
+  margin-bottom: 1rem;
+}
+
+.step-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #1F2937;
+  margin-bottom: 0.75rem;
+}
+
+.step-description {
+  color: #6B7280;
+  font-size: 1rem;
+  line-height: 1.7;
+  margin-bottom: 1.25rem;
+}
+
+.step-features {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.step-features li {
+  color: #374151;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+/* ============================================
+   LADO IMAGEN (gradiente con emoji)
+   ============================================ */
+.step-image-side {
+  border-radius: 1.25rem;
+  min-height: 280px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 30px rgba(139, 92, 246, 0.2);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+.step-image-side:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 16px 50px rgba(139, 92, 246, 0.3);
+}
+
+.step-image-emoji {
+  font-size: 5rem;
+  filter: grayscale(20%) brightness(1.1);
+  opacity: 0.6;
+  transition: all 0.4s ease;
+}
+
+.step-image-side:hover .step-image-emoji {
+  opacity: 0.9;
+  transform: scale(1.15);
+}
+
+/* ============================================
+   CTA FINAL
+   ============================================ */
+.howorks-cta {
+  background: linear-gradient(135deg, #7C3AED 0%, #6D28D9 100%);
+  padding: 4rem 2rem;
+  text-align: center;
+  color: white;
+}
+
+.howorks-cta h2 {
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: 0.75rem;
+}
+
+.howorks-cta p {
+  font-size: 1.15rem;
+  opacity: 0.9;
+  margin-bottom: 2rem;
+}
+
+.btn-cta {
+  display: inline-block;
+  padding: 1rem 2.5rem;
+  background: white;
+  color: #7C3AED;
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 1.1rem;
+  text-decoration: none;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+}
+
+.btn-cta:hover {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+  color: #7C3AED;
 }
 
 /* ============================================
@@ -103,7 +291,21 @@
     font-size: 2rem;
   }
 
-  .step h2 {
+  .section-title {
+    font-size: 1.75rem;
+  }
+
+  .step-row,
+  .step-row-reverse {
+    grid-template-columns: 1fr;
+    direction: ltr;
+  }
+
+  .step-image-side {
+    min-height: 200px;
+  }
+
+  .howorks-cta h2 {
     font-size: 1.5rem;
   }
 }

@@ -3,19 +3,39 @@
   background-color: #FFFFFF !important;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   padding: 0.75rem 0;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
 }
 
 /* Container */
 .navbar-container {
+  width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 1.5rem;
+  padding: 0 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
 /* Logo */
+.navbar-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.navbar-logo-img {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    object-fit: cover;
+    filter: brightness(1.2) saturate(1.5) hue-rotate(-5deg);
+}
+
 .navbar-logo span {
   background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
   -webkit-background-clip: text;
@@ -30,40 +50,47 @@
 .navbar-links {
   display: flex;
   align-items: center;
-  gap: 2rem;
+  gap: 1.5rem;
   margin-left: auto;
 }
 
 /* Links individuales */
 .navbar-links .nav-link {
-  color: #374151 !important; /* Gris oscuro */
-  font-size: 1rem;
+  color: #374151 !important;
+  font-size: 0.95rem;
   font-weight: 500;
   transition: color 0.3s ease;
   text-decoration: none;
+  white-space: nowrap;
+  padding: 0.5rem 0 !important;
 }
 
 .navbar-links .nav-link:hover {
-  color: #8B5CF6 !important; /* Morado al hover */
+  color: #8B5CF6 !important;
 }
 
-/* Botón registrarse CON DEGRADADO */
+/* Botón registrarse / cerrar sesión CON DEGRADADO */
 .btn-register {
   background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 50%, #6D28D9 100%) !important;
-  color: white;
-  padding: 0.625rem 1.75rem !important;
+  color: white !important;
+  padding: 0.5rem 1.5rem !important;
   border-radius: 50px !important;
   font-weight: 600 !important;
   border: none !important;
   box-shadow: 0 4px 14px rgba(139, 92, 246, 0.4);
   transition: all 0.3s ease;
   text-decoration: none;
+  cursor: pointer;
+  font-size: 0.95rem;
+  white-space: nowrap;
+  margin-left: 0.5rem;
 }
 
 .btn-register:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(139, 92, 246, 0.6);
   background: linear-gradient(135deg, #9333EA 0%, #8B5CF6 50%, #7C3AED 100%) !important;
+  color: white !important;
 }
 
 /* Botón hamburguesa */
@@ -78,6 +105,10 @@
 
 /* Responsive */
 @media (max-width: 767px) {
+  .navbar-container {
+    padding: 0 1rem;
+  }
+
   .navbar-collapse {
     background-color: #FFFFFF;
     margin-top: 1rem;
@@ -95,12 +126,13 @@
   .navbar-links .nav-link {
     width: 100%;
     text-align: center;
-    padding: 0.75rem 0;
+    padding: 0.75rem 0 !important;
   }
   
   .btn-register {
     width: 100%;
     text-align: center;
     margin-top: 0.5rem;
+    margin-left: 0 !important;
   }
 }

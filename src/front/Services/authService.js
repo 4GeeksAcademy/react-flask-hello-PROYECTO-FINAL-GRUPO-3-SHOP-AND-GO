@@ -3,7 +3,7 @@ const API_URL = import.meta.env.VITE_BACKEND_URL;
 //========================================
 //REGISTER
 //========================================
-export const register = async (newUser, navigate) => {
+export const register = async (newUser) => {
     const response = await fetch(`${API_URL}/api/register`, {
         method: "POST",
         body: JSON.stringify(newUser),
@@ -16,11 +16,10 @@ export const register = async (newUser, navigate) => {
 
     if (!response.ok) {
         alert(data.error);
-        return;
+        return false;
     }
 
-    localStorage.setItem("token", data.token);
-    navigate("/login");
+    return true;
 };
 
 //========================================
@@ -48,8 +47,7 @@ export const login = async (user, navigate) => {
 
     // Navegamos según el role seleccionado
     if (user.role === "driver") {
-        navigate("/driver/profile"); //// //========================================
-        // URGENTE EDITARRR!!
+        navigate("/driver/profile");
     } else {
         navigate("/Profileuser");
     }
@@ -75,6 +73,24 @@ export const getToken = () => {
 //========================================
 export const getRole = () => {
     return localStorage.getItem("role");
+};
+
+//========================================
+//GET ORDERS
+//========================================
+export const getOrders = async () => {
+    const token = localStorage.getItem("token");
+
+    const response = await fetch(import.meta.env.VITE_BACKEND_URL + "/api/orders", {
+        method: "GET",
+        headers: {
+            "Authorization": "Bearer " + token,
+            "Content-Type": "application/json"
+        }
+    });
+
+    const data = await response.json();
+    return data;
 };
 
 //========================================
