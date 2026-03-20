@@ -235,3 +235,38 @@
     max-width: 100%;
   }
 }
+
+/* ============================================
+   BOTÓN HACER PEDIDO - Latente
+   ============================================ */
+.btn-hacer-pedido {
+    background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 50%, #6D28D9 100%);
+    color: white;
+    padding: 0.75rem 2rem;
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 1rem;
+    border: none;
+    box-shadow: 0 4px 14px rgba(139, 92, 246, 0.4);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    animation: latido 1.5s ease-in-out infinite;
+}
+
+.btn-hacer-pedido:hover {
+    animation: none;
+    transform: scale(1.15);
+    box-shadow: 0 10px 30px rgba(139, 92, 246, 0.8);
+    background: linear-gradient(135deg, #A855F7 0%, #9333EA 50%, #7C3AED 100%);
+}
+
+@keyframes latido {
+    0%, 100% {
+        box-shadow: 0 4px 14px rgba(139, 92, 246, 0.4);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 8px 25px rgba(139, 92, 246, 0.8);
+        transform: scale(1.07);
+    }
+}
