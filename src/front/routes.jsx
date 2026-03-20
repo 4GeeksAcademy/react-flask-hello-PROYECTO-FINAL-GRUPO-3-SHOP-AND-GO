@@ -1,7 +1,7 @@
 import {
-    createBrowserRouter,
-    createRoutesFromElements,
-    Route,
+  createBrowserRouter,
+  createRoutesFromElements,
+  Route,
 } from "react-router-dom";
 import { Layout } from "./pages/Layout";
 import { Home } from "./pages/Home";
@@ -14,25 +14,63 @@ import { Help } from "./pages/Help";
 import { Profileuser } from "./pages/Profileuser";
 import { ProfileDriver } from "./pages/ProfileDriver";
 import HacerPedido from "./pages/HacerPedido";
+import { MisPedidos } from "./pages/MisPedidos";
+import { TrackingPedido } from "./pages/TrackingPedido";
+import { PrivateRoute } from "./components/PrivateRoute";
 import { Stores } from "./pages/Stores";
+import { PedidoFinalizado } from "./pages/PedidoFinalizado";
+// import { Stores } from "./pages/Stores";
 
 export const router = createBrowserRouter(
     createRoutesFromElements(
       <Route path="/" element={<Layout />} errorElement={<h1>Not found!</h1>} >
+ 
+        {/* Rutas públicas */}
+        <Route path="/" element={<Home />} />
+        <Route path="/register" element={<Authpage />} />
+        <Route path="/Login" element={<Authpage />} />
+        <Route path="/Howorks" element={<Howorks />} />
+        <Route path="/Foriders" element={<Foriders />} />
+        <Route path="/Help" element={<Help />} />
+        <Route path="/Stores" element={<Stores />} />
+ 
+        {/* Rutas protegidas - solo USUARIO */}
+        <Route path="/Profileuser" element={
+          <PrivateRoute allowedRoles={["user"]}>
+            <Profileuser />
+          </PrivateRoute>
+        } />
+        <Route path="/hacer-pedido" element={
+          <PrivateRoute allowedRoles={["user"]}>
+            <HacerPedido />
+          </PrivateRoute>
+        } />
+        <Route path="/mis-pedidos" element={
+          <PrivateRoute allowedRoles={["user"]}>
+            <MisPedidos />
+          </PrivateRoute>
+        } />
+        <Route path="/tracking/:orderId" element={
+          <PrivateRoute allowedRoles={["user"]}>
+            <TrackingPedido />
+          </PrivateRoute>
+        } />
+ 
+        {/* Rutas protegidas - solo DRIVER */}      <Route
+        path="/pedido-finalizado/:orderId"
+        element={
+          <PrivateRoute>
+            <PedidoFinalizado />
+          </PrivateRoute>
+        }
+      />
 
-        {/* Nested Routes: Defines sub-routes within the BaseHome component. */}
-        <Route path= "/" element={<Home />} />
-        {/* <Route path="/single/:theId" element={ <Single />} />  Dynamic route for single items */}
-        {/* <Route path="/demo" element={<Demo />} /> */}
-        <Route path="/register" element={<Authpage/>}/> {/* //Register */}
-        <Route path="/Login" element={<Authpage/>}/> {/* //Login */}
-        <Route path="/Howorks" element={<Howorks/>}/> {/* Cómo funciona*/}
-        <Route path="/Foriders" element={<Foriders/>}/> {/* Para riders*/}
-        <Route path="/Help" element={<Help/>}/> {/* Ayuda*/}
-        <Route path="/Profileuser" element={<Profileuser/>}/> {/* Perfil usuario*/}
-        <Route path="/driver/profile" element={<ProfileDriver/>}/> {/* URGENTE CAMBIAR RUTA*/}
-        <Route path="/hacer-pedido" element={<HacerPedido />} />
-        <Route path="/Stores" element={<Stores/>}/>
+        <Route path="/driver/profile" element={
+          <PrivateRoute allowedRoles={["driver"]}>
+            <ProfileDriver />
+          </PrivateRoute>
+        } />
+ 
       </Route>
     )
-)
+);
