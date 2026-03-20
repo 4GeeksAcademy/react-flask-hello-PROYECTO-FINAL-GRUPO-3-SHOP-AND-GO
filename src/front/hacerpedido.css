@@ -301,13 +301,14 @@
     color: #333;
 }
 
-/* RESUMEN */
+/* RESUMEN (MODIFICADO) */
 .pedido-summary {
     padding: 20px;
-    background: linear-gradient(180deg, #8a2dff 0%, #b214ff 100%);
+    background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 50%, #6D28D9 100%);
     color: white;
     position: sticky;
     top: 24px;
+    box-shadow: 0 16px 48px rgba(139, 92, 246, 0.35);
 }
 
 .pedido-summary h3 {
@@ -347,11 +348,18 @@
     height: 42px;
     border: none;
     border-radius: 14px;
-    background: #f4f4f7;
-    color: #6f2cff;
+    background: rgba(255, 255, 255, 0.95);
+    color: #6D28D9;
     font-weight: 800;
     font-size: 0.95rem;
     cursor: pointer;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
+    transition: 0.2s ease;
+}
+
+.pedido-summary button:hover {
+    transform: translateY(-1px);
+    background: #ffffff;
 }
 
 /* TABLET */
