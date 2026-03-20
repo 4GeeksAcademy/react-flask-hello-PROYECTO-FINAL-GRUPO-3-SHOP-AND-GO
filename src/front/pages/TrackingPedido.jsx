@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { MapContainer, TileLayer, Marker, Popup, Polyline } from "react-leaflet";
 import L from "leaflet";
 
@@ -17,6 +17,7 @@ export const TrackingPedido = () => {
     const [loading, setLoading] = useState(true);
     const [routeCoords, setRouteCoords] = useState([]);
     const [eta, setEta] = useState(null);
+    const navigate = useNavigate();
 
     const apiKey = import.meta.env.VITE_GEOAPIFY_API_KEY;
 
@@ -96,6 +97,12 @@ export const TrackingPedido = () => {
 
         return () => clearInterval(interval);
     }, [orderId]);
+
+    useEffect(() => {
+        if (order?.status === "delivered") {
+            navigate(`/pedido-finalizado/${order.id}`);
+        }
+    }, [order, navigate]);
 
     useEffect(() => {
         console.log("store_latitude:", order?.store_latitude);
