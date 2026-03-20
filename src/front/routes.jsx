@@ -17,6 +17,7 @@ import HacerPedido from "./pages/HacerPedido";
 import { MisPedidos } from "./pages/MisPedidos";
 import { TrackingPedido } from "./pages/TrackingPedido";
 import { PrivateRoute } from "./components/PrivateRoute";
+import { PedidoFinalizado } from "./pages/PedidoFinalizado";
 // import { Stores } from "./pages/Stores";
 
 export const router = createBrowserRouter(
@@ -73,6 +74,14 @@ export const router = createBrowserRouter(
         element={
           <PrivateRoute>
             <TrackingPedido />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/pedido-finalizado/:orderId"
+        element={
+          <PrivateRoute>
+            <PedidoFinalizado />
           </PrivateRoute>
         }
       />

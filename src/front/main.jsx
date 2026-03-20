@@ -8,6 +8,7 @@ import './foriders.css'
 import './help.css'
 import './profileuser.css'
 import './footer.css'
+import './PedidoFinalizado.css'
 import "leaflet/dist/leaflet.css";
 import "./TrackingPedido.css";
 import { RouterProvider } from "react-router-dom";  // Import RouterProvider to use the router
