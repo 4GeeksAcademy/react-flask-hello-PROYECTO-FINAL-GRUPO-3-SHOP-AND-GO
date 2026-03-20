@@ -1047,11 +1047,8 @@ def create_payment():
             amount=order.amount_cents,
             currency=currency,
             payment_method=payment_method.stripe_payment_method_id,
+            payment_method_types=["card"],
             confirm=True,
-            automatic_payment_methods={
-                "enabled": True,
-                "allow_redirects": "never"
-            },
             metadata={"order_id": order_id}
         )
 
@@ -1089,10 +1086,15 @@ def create_payment():
         }), 402
 
     except stripe.error.StripeError as e:
+        print("STRIPE ERROR:", str(e))
+        print("STRIPE USER MESSAGE:", getattr(e, "user_message", None))
         return jsonify({
             "error": "Stripe error",
             "details": str(e),
-            "payment_method_id": payment_method.stripe_payment_method_id
+            "user_message": getattr(e, "user_message", None),
+            "payment_method_id": payment_method.stripe_payment_method_id,
+            "order_amount_cents": order.amount_cents,
+            "currency": currency
         }), 400
 
     except Exception as e:
