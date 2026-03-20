@@ -38,12 +38,12 @@ export const Navbar = () => {
 						<Link className="nav-link" to="/">Inicio</Link>
 						<Link className="nav-link" to="/Howorks">Cómo funciona</Link>
 						<Link className="nav-link" to="/Foriders">Para Riders</Link>
-						<a className="nav-link" href="#">Tiendas</a>
+						<a className="nav-link" href="/Stores">Tiendas</a>
 						<Link className="nav-link" to="/Help">Ayuda</Link>
 
 						{token ? (
 							<>
-								<Link className="nav-link" to="/Profileuser">Mi Perfil</Link>
+								<Link className="nav-link" to={localStorage.getItem("role") === "driver" ? "/driver/profile" : "/Profileuser"}>Mi Perfil</Link>
 								<button className="btn-register" onClick={handleLogout}>Cerrar sesión</button>
 							</>
 						) : (
