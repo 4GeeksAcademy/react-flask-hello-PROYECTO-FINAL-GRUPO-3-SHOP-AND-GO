@@ -7,7 +7,7 @@ export const Profileuser = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [activeTab, setActiveTab] = useState('orders');
-  
+
   // Datos del backend
   const [orders, setOrders] = useState([]);
   const [addresses, setAddresses] = useState([]);
@@ -25,6 +25,8 @@ export const Profileuser = () => {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [editingAddress, setEditingAddress] = useState(null);
   const [editingPayment, setEditingPayment] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [profilePhoto, setProfilePhoto] = useState(null);
 
   useEffect(() => {
     const loadData = async () => {
@@ -46,6 +48,11 @@ export const Profileuser = () => {
         if (Array.isArray(paymentData)) {
           setPaymentMethods(paymentData);
         }
+
+        const savedPhoto = localStorage.getItem(`photo_${userData.id}`);
+        if (savedPhoto) setProfilePhoto(savedPhoto);
+
+
       } catch (error) {
         console.error("Error cargando datos:", error);
       }
@@ -203,26 +210,64 @@ export const Profileuser = () => {
   };
 
   if (!user) {
-    return <div className="loading">Cargando perfil...</div>;
+    return <div style={{ minHeight: "80vh" }}></div>;
   }
+
+  const handlePhotoUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setProfilePhoto(reader.result);
+      localStorage.setItem(`photo_${user.id}`, reader.result);
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3000);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleDeleteAccount = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(import.meta.env.VITE_BACKEND_URL + `/api/users/${user.id}`, {
+        method: "DELETE",
+        headers: { "Authorization": "Bearer " + token }
+      });
+      if (response.ok) {
+        logout();
+        navigate("/login");
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
 
   return (
     <div className="profile-page">
       <div className="profile-wrapper">
-        
+
         {/* HEADER CON INFO DEL USUARIO */}
         <div className="profile-header-card">
           <div className="header-content">
             <div className="user-avatar-section">
-              <div className="profile-avatar-large">
-                {user.name.charAt(0).toUpperCase()}
+              <div className="profile-avatar-large" onClick={() => document.getElementById("photoInput").click()} style={{ cursor: "pointer", overflow: "hidden", position: "relative" }}>
+                {profilePhoto ? (
+                  <img src={profilePhoto} alt="perfil" style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "inherit" }} />
+                ) : (
+                  user.name.charAt(0).toUpperCase()
+                )}
+                <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, background: "rgba(0,0,0,0.4)", color: "white", fontSize: "0.6rem", textAlign: "center", padding: "0.2rem", fontWeight: "700" }}>
+                  📷
+                </div>
               </div>
+              <input id="photoInput" type="file" accept="image/*" style={{ display: "none" }} onChange={handlePhotoUpload} />
             </div>
 
             <div className="user-info-section">
               <h1 className="user-name">{user.name}</h1>
               <p className="user-email">{user.email}</p>
-              
+
               <div className="user-stats">
                 <div className="stat-box">
                   <div className="stat-number">{ordersSummary.total}</div>
@@ -275,7 +320,7 @@ export const Profileuser = () => {
 
         {/* TAB CONTENT */}
         <div className="tab-content">
-          
+
           {/* TAB: MIS PEDIDOS */}
           {activeTab === 'orders' && (
             <div className="orders-section">
@@ -376,7 +421,7 @@ export const Profileuser = () => {
           {activeTab === 'settings' && (
             <div className="settings-section">
               <h2>Configuración</h2>
-              
+
               <div className="settings-card">
                 <h3>Notificaciones</h3>
                 <div className="notification-item">
@@ -418,6 +463,11 @@ export const Profileuser = () => {
                 <button className="btn-logout" onClick={handleLogout}>
                   🚪 Cerrar Sesión
                 </button>
+
+                <button className="btn-logout" onClick={() => setShowDeleteModal(true)} style={{ background: "white", color: "#dc2626", border: "2px solid #dc2626", marginTop: "1rem" }}>
+                  🗑️ Eliminar Cuenta
+                </button>
+
               </div>
             </div>
           )}
@@ -483,8 +533,8 @@ export const Profileuser = () => {
               <h2>{editingAddress ? 'Editar Dirección' : 'Nueva Dirección'}</h2>
               <button className="modal-close" onClick={() => setShowAddressModal(false)}>✕</button>
             </div>
-            <form onSubmit={(e) => { 
-              e.preventDefault(); 
+            <form onSubmit={(e) => {
+              e.preventDefault();
               const formData = new FormData(e.target);
               handleSaveAddress({
                 label: formData.get('label'),
@@ -554,8 +604,8 @@ export const Profileuser = () => {
               <h2>{editingPayment ? 'Editar Tarjeta' : 'Nueva Tarjeta'}</h2>
               <button className="modal-close" onClick={() => setShowPaymentModal(false)}>✕</button>
             </div>
-            <form onSubmit={(e) => { 
-              e.preventDefault(); 
+            <form onSubmit={(e) => {
+              e.preventDefault();
               const formData = new FormData(e.target);
               const brand = formData.get('brand').toLowerCase().trim();
 
@@ -621,7 +671,20 @@ export const Profileuser = () => {
           </div>
         </div>
       )}
-
+      {/* DELETE MODAL */}
+      {showDeleteModal && (
+        <div className="modal-overlay" onClick={() => setShowDeleteModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ textAlign: "center" }}>
+            <div style={{ fontSize: "3rem", marginBottom: "1rem" }}>⚠️</div>
+            <h2>¿Eliminar cuenta?</h2>
+            <p style={{ color: "#6b7280", marginBottom: "2rem" }}>Esta acción es irreversible. Se eliminarán todos tus datos.</p>
+            <div className="modal-actions">
+              <button className="btn-cancel" onClick={() => setShowDeleteModal(false)}>Cancelar</button>
+              <button className="btn-save" onClick={handleDeleteAccount} style={{ background: "#dc2626" }}>Sí, eliminar</button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* TOAST */}
       {showToast && (
         <div className="toast-notification">
