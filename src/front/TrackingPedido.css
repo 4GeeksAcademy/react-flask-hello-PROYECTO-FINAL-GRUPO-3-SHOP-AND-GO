@@ -41,20 +41,25 @@
 
 .tracking-eta-box {
     min-width: 160px;
-    background: linear-gradient(135deg, #7b2cff, #c114ff);
+    background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 50%, #6D28D9 100%);
     color: white;
     border-radius: 18px;
     padding: 16px 18px;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    box-shadow: 0 10px 24px rgba(123, 44, 255, 0.18);
+    box-shadow: 0 16px 48px rgba(139, 92, 246, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    position: relative;
+    overflow: hidden;
 }
 
 .tracking-eta-value {
     font-size: 1.35rem;
     font-weight: 800;
     margin-top: 4px;
+    color: white;
+    letter-spacing: 0.3px;
 }
 
 .tracking-map-wrapper {
