@@ -23,13 +23,7 @@ app = Flask(__name__)
 app.url_map.strict_slashes = False
 
 CORS(app)
-
-print("STRIPE KEY:", os.getenv("STRIPE_SECRET_KEY"))
-print("JWT KEY:", os.getenv("JWT_SECRET_KEY"))
-
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
-print("STRIPE API KEY SET:", stripe.api_key)
-
 app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
 jwt = JWTManager(app)
 
