@@ -17,6 +17,7 @@ import HacerPedido from "./pages/HacerPedido";
 import { MisPedidos } from "./pages/MisPedidos";
 import { TrackingPedido } from "./pages/TrackingPedido";
 import { PrivateRoute } from "./components/PrivateRoute";
+import { PedidoFinalizado } from "./pages/PedidoFinalizado";
 import { Stores } from "./pages/Stores";
 // import { Stores } from "./pages/Stores";
 
@@ -53,6 +54,21 @@ export const router = createBrowserRouter(
           <PrivateRoute allowedRoles={["user"]}>
             <TrackingPedido />
           </PrivateRoute>
+        }
+      />
+      <Route
+        path="/pedido-finalizado/:orderId"
+        element={
+          <PrivateRoute>
+            <PedidoFinalizado />
+          </PrivateRoute>
+        }
+      />
+
+      {/* <Route path="/Stores" element={<Stores />} /> */}
+    </Route>
+  )
+);
         } />
  
         {/* Rutas protegidas - solo DRIVER */}
