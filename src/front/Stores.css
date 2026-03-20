@@ -1,0 +1,566 @@
+/* ============================================
+   PÁGINA DE TIENDAS - MISMO ESTILO QUE PERFIL
+   ============================================ */
+.stores-page {
+  background: linear-gradient(to bottom, #f9fafb 0%, #ffffff 100%);
+  min-height: 100vh;
+  padding: 2rem 1rem;
+}
+
+.stores-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* ============================================
+   HEADER CARD
+   ============================================ */
+.stores-header-card {
+  background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 50%, #6D28D9 100%);
+  border-radius: 28px;
+  padding: 2.5rem 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 20px 60px rgba(139, 92, 246, 0.4);
+  position: relative;
+  overflow: hidden;
+}
+
+.stores-header-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%),
+              radial-gradient(circle at 80% 80%, rgba(255,255,255,0.1) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.stores-header-top {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.stores-header-card h1 {
+  color: white;
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin: 0 0 0.5rem;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.stores-header-card p {
+  color: rgba(255,255,255,0.85);
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+/* ============================================
+   BOTÓN AÑADIR TIENDA
+   ============================================ */
+.btn-add-store {
+  background: white;
+  color: #7C3AED;
+  border: none;
+  padding: 0.875rem 1.5rem;
+  border-radius: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 1rem;
+  white-space: nowrap;
+  box-shadow: 0 4px 16px rgba(255, 255, 255, 0.3);
+  transition: all 0.3s ease;
+}
+
+.btn-add-store:hover {
+  background: #FDE047;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(253, 224, 71, 0.6);
+}
+
+/* ============================================
+   BUSCADOR
+   ============================================ */
+.stores-search-container {
+  position: relative;
+  max-width: 500px;
+}
+
+.stores-search-icon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.2rem;
+}
+
+.stores-search-input {
+  width: 100%;
+  padding: 0.875rem 1rem 0.875rem 3rem;
+  border-radius: 16px;
+  border: none;
+  font-size: 1rem;
+  box-sizing: border-box;
+  outline: none;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+}
+
+/* ============================================
+   FILTROS DE CATEGORÍA
+   ============================================ */
+.stores-filters {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 2rem;
+}
+
+.filter-btn {
+  padding: 0.5rem 1.25rem;
+  border-radius: 50px;
+  border: 2px solid #7C3AED;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+  background: white;
+  color: #7C3AED;
+}
+
+.filter-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(139,92,246,0.3);
+}
+
+.filter-btn.active {
+  background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(139,92,246,0.4);
+}
+
+/* ============================================
+   CONTADOR
+   ============================================ */
+.stores-counter {
+  color: #6b7280;
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+}
+
+/* ============================================
+   GRID DE TIENDAS
+   ============================================ */
+.stores-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+}
+
+.store-card {
+  background: white;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  border: 2px solid #f3f4f6;
+  transition: all 0.3s ease;
+}
+
+.store-card:hover {
+  border-color: #8B5CF6;
+  box-shadow: 0 8px 32px rgba(139,92,246,0.2);
+  transform: translateY(-4px);
+}
+
+.store-qr {
+  width: 100%;
+  height: 180px;
+  background: linear-gradient(135deg, #f5f3ff, #ede9fe);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.store-info {
+  padding: 1.5rem;
+}
+
+.store-info-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  margin-bottom: 0.75rem;
+}
+
+.store-name {
+  color: #1f2937;
+  font-weight: 800;
+  font-size: 1.2rem;
+  margin: 0;
+}
+
+.store-status {
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.store-status.active {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.store-status.inactive {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.store-address {
+  color: #6b7280;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+.store-postal {
+  color: #9ca3af;
+  font-size: 0.85rem;
+  margin-bottom: 1.5rem;
+}
+
+.store-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btn-order {
+  flex: 1;
+  padding: 0.875rem;
+  background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.btn-order:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(139,92,246,0.4);
+}
+
+.btn-order:disabled {
+  background: #e5e7eb;
+  color: #9ca3af;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.btn-edit-store {
+  padding: 0.875rem;
+  background: #f3f4f6;
+  color: #374151;
+  border: none;
+  border-radius: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.btn-edit-store:hover {
+  background: #e5e7eb;
+  transform: translateY(-2px);
+}
+
+.btn-deactivate-store {
+  padding: 0.875rem;
+  background: #fee2e2;
+  color: #991b1b;
+  border: none;
+  border-radius: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.btn-deactivate-store:hover {
+  background: #fca5a5;
+  transform: translateY(-2px);
+}
+
+/* ============================================
+   EMPTY STATE
+   ============================================ */
+.stores-empty {
+  text-align: center;
+  padding: 4rem;
+  color: #9ca3af;
+}
+
+.stores-empty-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.stores-empty p {
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+/* ============================================
+   MODAL
+   ============================================ */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(8px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease;
+}
+
+.modal-content {
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 24px;
+  padding: 2rem;
+  max-width: 500px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 24px 48px rgba(0,0,0,0.3);
+  animation: slideUp 0.3s ease;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.modal-header h2 {
+  color: #7C3AED;
+  font-size: 1.8rem;
+  font-weight: 800;
+  margin: 0;
+}
+
+.modal-close {
+  background: transparent;
+  border: none;
+  font-size: 2rem;
+  color: #9ca3af;
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.modal-close:hover {
+  background: #f3f4f6;
+  color: #374151;
+  transform: rotate(90deg);
+}
+
+.modal-input-group {
+  margin-bottom: 1.25rem;
+}
+
+.modal-input-group label {
+  display: block;
+  color: #374151;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.modal-input-group input,
+.modal-input-group select,
+.modal-input-group textarea {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background: white;
+  color: #374151;
+  box-sizing: border-box;
+}
+
+.modal-input-group input:focus,
+.modal-input-group select:focus,
+.modal-input-group textarea:focus {
+  outline: none;
+  border-color: #7C3AED;
+  box-shadow: 0 0 0 3px rgba(124,58,237,0.1);
+}
+
+.modal-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 2px solid #e5e7eb;
+}
+
+.btn-cancel {
+  flex: 1;
+  padding: 0.875rem 1.5rem;
+  border-radius: 12px;
+  border: none;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+.btn-cancel:hover {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.btn-save {
+  flex: 2;
+  padding: 0.875rem 1.5rem;
+  border-radius: 12px;
+  border: none;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(139,92,246,0.3);
+}
+
+.btn-save:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(139,92,246,0.4);
+}
+
+/* ============================================
+   TOAST
+   ============================================ */
+.toast-notification {
+  position: fixed;
+  top: 2rem;
+  right: 2rem;
+  background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
+  color: white;
+  padding: 1rem 1.5rem;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(139,92,246,0.4);
+  font-weight: 600;
+  font-size: 1rem;
+  z-index: 2000;
+  animation: slideInRight 0.3s ease, slideOutRight 0.3s ease 2.7s forwards;
+}
+
+/* ============================================
+   STORE SELECTED BOX
+   ============================================ */
+.store-selected-box {
+  background: #f5f3ff;
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  border: 2px solid #e9d5ff;
+}
+
+.store-selected-name {
+  font-weight: 700;
+  color: #7C3AED;
+}
+
+.store-selected-address {
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(50px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(400px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideOutRight {
+  from { transform: translateX(0); opacity: 1; }
+  to { transform: translateX(400px); opacity: 0; }
+}
+
+.loading {
+  color: #7C3AED;
+  font-size: 1.5rem;
+  text-align: center;
+  padding: 4rem 2rem;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 768px) {
+  .stores-page {
+    padding: 1rem 0.5rem;
+  }
+
+  .stores-header-card {
+    padding: 1.5rem;
+  }
+
+  .stores-header-card h1 {
+    font-size: 1.75rem;
+  }
+
+  .stores-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-content {
+    padding: 1.5rem;
+  }
+
+  .modal-actions {
+    flex-direction: column;
+  }
+
+  .toast-notification {
+    top: 1rem;
+    right: 1rem;
+    left: 1rem;
+    text-align: center;
+  }
+}

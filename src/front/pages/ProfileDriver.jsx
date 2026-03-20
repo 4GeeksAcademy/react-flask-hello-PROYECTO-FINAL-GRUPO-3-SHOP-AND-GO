@@ -24,26 +24,19 @@ export const ProfileDriver = () => {
       try {
         const token = getToken();
         if (!token) { navigate("/login"); return; }
-
         const response = await fetch(`${API_URL}/api/profile`, {
           headers: { "Authorization": `Bearer ${token}` }
         });
-
         if (!response.ok) { navigate("/login"); return; }
-
         const userData = await response.json();
         if (userData.role !== "driver") { navigate("/login"); return; }
-
         setUser(userData);
         setIsAvailable(userData.is_available);
         setEditedUser({ name: userData.name, email: userData.email, phone: userData.phone });
-
         const savedVehicle = localStorage.getItem(`vehicle_${userData.id}`);
         if (savedVehicle) setVehicleData(JSON.parse(savedVehicle));
-
         const savedPhoto = localStorage.getItem(`photo_${userData.id}`);
         if (savedPhoto) setProfilePhoto(savedPhoto);
-
       } catch (error) {
         navigate("/login");
       }
@@ -117,7 +110,6 @@ export const ProfileDriver = () => {
   const handlePhotoUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
     const reader = new FileReader();
     reader.onloadend = () => {
       const base64 = reader.result;
@@ -177,12 +169,10 @@ export const ProfileDriver = () => {
   const getWeeklyData = () => {
     const days = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
     const weeklyMap = { "Lun": 0, "Mar": 0, "Mié": 0, "Jue": 0, "Vie": 0, "Sáb": 0, "Dom": 0 };
-
     const today = new Date();
     const startOfWeek = new Date(today);
     startOfWeek.setDate(today.getDate() - today.getDay() + 1);
     startOfWeek.setHours(0, 0, 0, 0);
-
     deliveredOrders.forEach(order => {
       const orderDate = new Date(order.created_at);
       if (orderDate >= startOfWeek) {
@@ -190,7 +180,6 @@ export const ProfileDriver = () => {
         weeklyMap[dayName] += order.amount || 0;
       }
     });
-
     return Object.entries(weeklyMap).map(([day, amount]) => ({ day, amount }));
   };
 
@@ -204,6 +193,14 @@ export const ProfileDriver = () => {
     delivered: "📦 Entregado",
     cancelled: "❌ Cancelado"
   })[status] || status;
+
+  const getStatusColor = (status) => ({
+    pending: { bg: "#fef3c7", color: "#92400e" },
+    accepted: { bg: "#d1fae5", color: "#065f46" },
+    in_transit: { bg: "#dbeafe", color: "#1e40af" },
+    delivered: { bg: "#d1fae5", color: "#065f46" },
+    cancelled: { bg: "#fee2e2", color: "#991b1b" }
+  })[status] || { bg: "#f3f4f6", color: "#374151" };
 
   const getNextStatus = (status) => ({
     pending: "accepted",
@@ -256,19 +253,12 @@ export const ProfileDriver = () => {
               <div style={{
                 position: "absolute", bottom: 0, left: 0, right: 0,
                 background: "rgba(0,0,0,0.4)", color: "white",
-                fontSize: "0.6rem", textAlign: "center", padding: "0.25rem",
-                fontWeight: "700"
+                fontSize: "0.6rem", textAlign: "center", padding: "0.25rem", fontWeight: "700"
               }}>
                 📷 Cambiar
               </div>
             </div>
-            <input
-              id="photoInput"
-              type="file"
-              accept="image/*"
-              style={{ display: "none" }}
-              onChange={handlePhotoUpload}
-            />
+            <input id="photoInput" type="file" accept="image/*" style={{ display: "none" }} onChange={handlePhotoUpload} />
           </div>
 
           {/* INFO */}
@@ -296,9 +286,7 @@ export const ProfileDriver = () => {
             border: "2px solid rgba(255,255,255,0.3)", borderRadius: "20px",
             padding: "1.25rem", textAlign: "center", minWidth: "160px"
           }}>
-            <div style={{ color: "rgba(255,255,255,0.8)", fontSize: "0.85rem", marginBottom: "0.75rem", fontWeight: "600" }}>
-              Estado
-            </div>
+            <div style={{ color: "rgba(255,255,255,0.8)", fontSize: "0.85rem", marginBottom: "0.75rem", fontWeight: "600" }}>Estado</div>
             <div style={{
               background: isAvailable ? "#10b981" : "#6b7280",
               color: "white", borderRadius: "12px", padding: "0.5rem 1rem",
@@ -321,11 +309,12 @@ export const ProfileDriver = () => {
         {/* TABS */}
         <div style={{
           background: "white", borderRadius: "16px", border: "1px solid #e5e7eb",
-          padding: "0.4rem", marginBottom: "1.5rem", display: "flex", gap: "0.4rem",
+          padding: "0.4rem", marginBottom: "1.5rem", display: "flex", gap: "0.4rem", flexWrap: "wrap",
           boxShadow: "0 2px 8px rgba(0,0,0,0.04)"
         }}>
           {[
             { key: "resumen", label: "📊 Resumen" },
+            { key: "pedidos", label: "🚴 Mis Pedidos" },
             { key: "historial", label: "📦 Historial" },
             { key: "ganancias", label: "€ Ganancias" },
             { key: "perfil", label: "⚙️ Mi Perfil" }
@@ -335,9 +324,20 @@ export const ProfileDriver = () => {
               fontWeight: "600", fontSize: "0.95rem", cursor: "pointer", transition: "all 0.3s",
               background: activeTab === tab.key ? "linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%)" : "transparent",
               color: activeTab === tab.key ? "white" : "#6b7280",
-              boxShadow: activeTab === tab.key ? "0 4px 16px rgba(139,92,246,0.4)" : "none"
+              boxShadow: activeTab === tab.key ? "0 4px 16px rgba(139,92,246,0.4)" : "none",
+              position: "relative"
             }}>
               {tab.label}
+              {tab.key === "pedidos" && activeOrders.length > 0 && (
+                <span style={{
+                  position: "absolute", top: "6px", right: "6px",
+                  background: "#ef4444", color: "white", borderRadius: "50%",
+                  width: "18px", height: "18px", fontSize: "0.7rem",
+                  display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "800"
+                }}>
+                  {activeOrders.length}
+                </span>
+              )}
             </button>
           ))}
         </div>
@@ -371,7 +371,6 @@ export const ProfileDriver = () => {
                 ))}
               </div>
 
-              {/* GRÁFICA */}
               <h3 style={{ color: "#1f2937", fontWeight: "800", marginBottom: "1.5rem" }}>📈 Ganancias esta semana</h3>
               <div style={{ display: "flex", alignItems: "flex-end", gap: "0.75rem", height: "160px" }}>
                 {weeklyData.map((d, i) => (
@@ -386,30 +385,130 @@ export const ProfileDriver = () => {
                   </div>
                 ))}
               </div>
+            </div>
+          )}
 
-              {activeOrders.length > 0 && (
-                <div style={{ marginTop: "2rem" }}>
-                  <h3 style={{ color: "#1f2937", fontWeight: "800", marginBottom: "1rem" }}>🚴 Pedidos activos ahora</h3>
-                  {activeOrders.map(order => (
-                    <div key={order.id} style={{ border: "2px solid #f3f4f6", borderRadius: "16px", padding: "1.5rem", marginBottom: "1rem", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "1rem" }}>
-                      <div>
-                        <div style={{ fontWeight: "800", color: "#7C3AED", marginBottom: "0.5rem" }}>Pedido #{order.id}</div>
-                        <div style={{ color: "#6b7280", fontSize: "0.9rem" }}>{getStatusLabel(order.status)}</div>
-                        <div style={{ color: "#9ca3af", fontSize: "0.85rem" }}>🏪 {order.store_name}</div>
+          {/* MIS PEDIDOS */}
+          {activeTab === "pedidos" && (
+            <div>
+              <h2 style={{ color: "#7C3AED", fontWeight: "800", marginBottom: "1.5rem" }}>
+                🚴 Mis Pedidos Activos
+                {activeOrders.length > 0 && (
+                  <span style={{
+                    marginLeft: "0.75rem", background: "#ef4444", color: "white",
+                    borderRadius: "20px", padding: "0.2rem 0.75rem", fontSize: "0.9rem", fontWeight: "700"
+                  }}>
+                    {activeOrders.length}
+                  </span>
+                )}
+              </h2>
+
+              {activeOrders.length === 0 ? (
+                <div style={{ textAlign: "center", padding: "4rem", color: "#9ca3af" }}>
+                  <div style={{ fontSize: "3rem", marginBottom: "1rem" }}>🚴</div>
+                  <p style={{ fontSize: "1.2rem", fontWeight: "600" }}>No tienes pedidos activos</p>
+                  <p style={{ fontSize: "0.95rem" }}>Activa tu disponibilidad para recibir pedidos</p>
+                </div>
+              ) : (
+                activeOrders.map(order => {
+                  const statusColor = getStatusColor(order.status);
+                  return (
+                    <div key={order.id} style={{
+                      border: "2px solid #f3f4f6", borderRadius: "20px", padding: "1.5rem",
+                      marginBottom: "1.5rem", boxShadow: "0 4px 16px rgba(0,0,0,0.06)"
+                    }}>
+                      {/* HEADER DEL PEDIDO */}
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem", flexWrap: "wrap", gap: "0.5rem" }}>
+                        <h3 style={{ color: "#7C3AED", fontWeight: "800", margin: 0, fontSize: "1.2rem" }}>
+                          Pedido #{order.id}
+                        </h3>
+                        <span style={{
+                          background: statusColor.bg, color: statusColor.color,
+                          padding: "0.4rem 1rem", borderRadius: "20px", fontWeight: "700", fontSize: "0.9rem"
+                        }}>
+                          {getStatusLabel(order.status)}
+                        </span>
                       </div>
-                      <div style={{ display: "flex", gap: "0.75rem" }}>
+
+                      {/* DETALLES */}
+                      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "0.75rem", marginBottom: "1.5rem" }}>
+                        <div style={{ background: "#f9fafb", borderRadius: "12px", padding: "0.875rem" }}>
+                          <div style={{ color: "#9ca3af", fontSize: "0.8rem", fontWeight: "600", marginBottom: "0.25rem" }}>TIENDA</div>
+                          <div style={{ color: "#374151", fontWeight: "700" }}>🏪 {order.store_name}</div>
+                        </div>
+                        <div style={{ background: "#f9fafb", borderRadius: "12px", padding: "0.875rem" }}>
+                          <div style={{ color: "#9ca3af", fontSize: "0.8rem", fontWeight: "600", marginBottom: "0.25rem" }}>CLIENTE</div>
+                          <div style={{ color: "#374151", fontWeight: "700" }}>👤 {order.client_name}</div>
+                        </div>
+                        <div style={{ background: "#f9fafb", borderRadius: "12px", padding: "0.875rem" }}>
+                          <div style={{ color: "#9ca3af", fontSize: "0.8rem", fontWeight: "600", marginBottom: "0.25rem" }}>DIRECCIÓN</div>
+                          <div style={{ color: "#374151", fontWeight: "700" }}>📍 {order.delivery_address}</div>
+                        </div>
+                        <div style={{ background: "#f9fafb", borderRadius: "12px", padding: "0.875rem" }}>
+                          <div style={{ color: "#9ca3af", fontSize: "0.8rem", fontWeight: "600", marginBottom: "0.25rem" }}>BOLSAS</div>
+                          <div style={{ color: "#374151", fontWeight: "700" }}>🛍️ {order.bags_count}</div>
+                        </div>
+                        {order.notes && (
+                          <div style={{ background: "#fef3c7", borderRadius: "12px", padding: "0.875rem", gridColumn: "1 / -1" }}>
+                            <div style={{ color: "#92400e", fontSize: "0.8rem", fontWeight: "600", marginBottom: "0.25rem" }}>NOTAS</div>
+                            <div style={{ color: "#92400e", fontWeight: "600" }}>📝 {order.notes}</div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* BARRA DE PROGRESO */}
+                      <div style={{ marginBottom: "1.5rem" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.5rem" }}>
+                          {["pending", "accepted", "in_transit", "delivered"].map((s, i) => (
+                            <div key={s} style={{ display: "flex", flexDirection: "column", alignItems: "center", flex: 1 }}>
+                              <div style={{
+                                width: "32px", height: "32px", borderRadius: "50%",
+                                background: ["pending", "accepted", "in_transit", "delivered"].indexOf(order.status) >= i
+                                  ? "linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%)"
+                                  : "#e5e7eb",
+                                display: "flex", alignItems: "center", justifyContent: "center",
+                                fontSize: "0.9rem", marginBottom: "0.25rem"
+                              }}>
+                                {["⏳", "✅", "🚴", "📦"][i]}
+                              </div>
+                              <span style={{ fontSize: "0.65rem", color: "#6b7280", textAlign: "center", fontWeight: "600" }}>
+                                {["Pendiente", "Aceptado", "En camino", "Entregado"][i]}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* BOTONES DE ACCIÓN */}
+                      <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
                         {getNextStatus(order.status) && (
-                          <button onClick={() => handleUpdateOrderStatus(order.id, getNextStatus(order.status))} style={{ background: "linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%)", color: "white", border: "none", padding: "0.75rem 1.25rem", borderRadius: "12px", fontWeight: "700", cursor: "pointer" }}>
+                          <button
+                            onClick={() => handleUpdateOrderStatus(order.id, getNextStatus(order.status))}
+                            style={{
+                              flex: 2, padding: "0.875rem 1.25rem",
+                              background: "linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%)",
+                              color: "white", border: "none", borderRadius: "12px",
+                              fontWeight: "700", cursor: "pointer", fontSize: "1rem"
+                            }}
+                          >
                             {getNextStatusLabel(order.status)}
                           </button>
                         )}
-                        <button onClick={() => handleUpdateOrderStatus(order.id, "cancelled")} style={{ background: "#fee2e2", color: "#991b1b", border: "none", padding: "0.75rem 1.25rem", borderRadius: "12px", fontWeight: "700", cursor: "pointer" }}>
-                          Cancelar
+                        <button
+                          onClick={() => handleUpdateOrderStatus(order.id, "cancelled")}
+                          style={{
+                            flex: 1, padding: "0.875rem 1.25rem",
+                            background: "#fee2e2", color: "#991b1b",
+                            border: "2px solid #fca5a5", borderRadius: "12px",
+                            fontWeight: "700", cursor: "pointer", fontSize: "1rem"
+                          }}
+                        >
+                          ❌ Cancelar
                         </button>
                       </div>
                     </div>
-                  ))}
-                </div>
+                  );
+                })
               )}
             </div>
           )}
@@ -453,7 +552,6 @@ export const ProfileDriver = () => {
                   </div>
                 ))}
               </div>
-
               <h3 style={{ color: "#1f2937", fontWeight: "800", marginBottom: "1rem" }}>Últimas ganancias</h3>
               {deliveredOrders.length === 0 ? (
                 <p style={{ color: "#9ca3af", textAlign: "center", padding: "2rem" }}>No tienes ganancias aún</p>
@@ -476,7 +574,6 @@ export const ProfileDriver = () => {
             <div>
               <h2 style={{ color: "#7C3AED", fontWeight: "800", marginBottom: "1.5rem" }}>Mi Perfil</h2>
 
-              {/* INFORMACIÓN PERSONAL */}
               <div style={{ border: "2px solid #f3f4f6", borderRadius: "16px", padding: "2rem", marginBottom: "1.5rem" }}>
                 <h3 style={{ color: "#7C3AED", fontWeight: "700", marginBottom: "1.5rem" }}>⚙️ Información Personal</h3>
                 <form onSubmit={(e) => { e.preventDefault(); handleSaveChanges(); }}>
@@ -503,18 +600,14 @@ export const ProfileDriver = () => {
                 </form>
               </div>
 
-              {/* INFORMACIÓN DEL VEHÍCULO */}
               <div style={{ border: "2px solid #f3f4f6", borderRadius: "16px", padding: "2rem", marginBottom: "1.5rem" }}>
                 <h3 style={{ color: "#7C3AED", fontWeight: "700", marginBottom: "1.5rem" }}>🛵 Información del Vehículo</h3>
                 <form onSubmit={(e) => { e.preventDefault(); handleSaveVehicle(); }}>
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", marginBottom: "1.25rem" }}>
                     <div>
                       <label style={{ display: "block", color: "#6b7280", fontSize: "0.85rem", marginBottom: "0.5rem" }}>Tipo de vehículo</label>
-                      <select
-                        value={vehicleData.type}
-                        onChange={(e) => setVehicleData({ ...vehicleData, type: e.target.value })}
-                        style={{ width: "100%", padding: "0.875rem 1rem", border: "2px solid #e5e7eb", borderRadius: "12px", fontSize: "1rem", boxSizing: "border-box", color: "#374151", background: "white" }}
-                      >
+                      <select value={vehicleData.type} onChange={(e) => setVehicleData({ ...vehicleData, type: e.target.value })}
+                        style={{ width: "100%", padding: "0.875rem 1rem", border: "2px solid #e5e7eb", borderRadius: "12px", fontSize: "1rem", boxSizing: "border-box", color: "#374151", background: "white" }}>
                         <option value="Moto Scooter">Moto Scooter</option>
                         <option value="Bicicleta">Bicicleta</option>
                         <option value="Coche">Coche</option>
@@ -524,13 +617,9 @@ export const ProfileDriver = () => {
                     </div>
                     <div>
                       <label style={{ display: "block", color: "#6b7280", fontSize: "0.85rem", marginBottom: "0.5rem" }}>Matrícula</label>
-                      <input
-                        type="text"
-                        value={vehicleData.plate}
-                        onChange={(e) => setVehicleData({ ...vehicleData, plate: e.target.value })}
+                      <input type="text" value={vehicleData.plate} onChange={(e) => setVehicleData({ ...vehicleData, plate: e.target.value })}
                         placeholder="Ej: M-1234-BC"
-                        style={{ width: "100%", padding: "0.875rem 1rem", border: "2px solid #e5e7eb", borderRadius: "12px", fontSize: "1rem", boxSizing: "border-box", color: "#374151" }}
-                      />
+                        style={{ width: "100%", padding: "0.875rem 1rem", border: "2px solid #e5e7eb", borderRadius: "12px", fontSize: "1rem", boxSizing: "border-box", color: "#374151" }} />
                     </div>
                   </div>
                   <button type="submit" style={{ background: "linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%)", color: "white", border: "none", padding: "0.875rem 2rem", borderRadius: "12px", fontWeight: "700", cursor: "pointer" }}>
@@ -539,7 +628,6 @@ export const ProfileDriver = () => {
                 </form>
               </div>
 
-              {/* DOCUMENTACIÓN */}
               <div style={{ border: "2px solid #f3f4f6", borderRadius: "16px", padding: "2rem", marginBottom: "1.5rem" }}>
                 <h3 style={{ color: "#374151", fontWeight: "700", marginBottom: "1.5rem" }}>📄 Documentación</h3>
                 {[
@@ -557,7 +645,6 @@ export const ProfileDriver = () => {
                 ))}
               </div>
 
-              {/* CERRAR SESIÓN Y ELIMINAR CUENTA */}
               <div style={{ border: "2px solid #f3f4f6", borderRadius: "16px", padding: "2rem" }}>
                 <h3 style={{ color: "#374151", fontWeight: "700", marginBottom: "1rem" }}>Sesión</h3>
                 <button onClick={() => { logout(); navigate("/login"); }} style={{
@@ -594,9 +681,7 @@ export const ProfileDriver = () => {
             boxShadow: "0 24px 48px rgba(0,0,0,0.3)"
           }}>
             <div style={{ fontSize: "3rem", marginBottom: "1rem" }}>⚠️</div>
-            <h2 style={{ color: "#374151", fontWeight: "800", marginBottom: "0.75rem" }}>
-              ¿Eliminar cuenta?
-            </h2>
+            <h2 style={{ color: "#374151", fontWeight: "800", marginBottom: "0.75rem" }}>¿Eliminar cuenta?</h2>
             <p style={{ color: "#6b7280", marginBottom: "2rem", lineHeight: "1.6" }}>
               Esta acción es irreversible. Se eliminarán todos tus datos permanentemente.
             </p>
