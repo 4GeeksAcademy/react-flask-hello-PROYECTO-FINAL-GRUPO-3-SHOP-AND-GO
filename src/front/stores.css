@@ -1,0 +1,345 @@
+/* ============================================
+   PÁGINA COMPLETA
+   ============================================ */
+.stores-page {
+  min-height: 100vh;
+}
+
+/* ============================================
+   HERO
+   ============================================ */
+.stores-hero {
+  background: linear-gradient(135deg, #A855F7 0%, #9333EA 30%, #7C3AED 60%, #6D28D9 100%);
+  padding: 5rem 2rem;
+  text-align: center;
+  color: white;
+}
+
+.stores-hero-title {
+  font-size: 3rem;
+  font-weight: 900;
+  margin-bottom: 1rem;
+  text-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.stores-hero-title .highlight {
+  color: #FDE047;
+}
+
+.stores-hero-subtitle {
+  font-size: 1.25rem;
+  opacity: 0.9;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* ============================================
+   STATS
+   ============================================ */
+.stores-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 3rem 2rem;
+}
+
+.stores-stat-card {
+  background: white;
+  border-radius: 1.25rem;
+  padding: 1.5rem 1rem;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid #F3F4F6;
+  transition: all 0.3s ease;
+  animation: fadeInUp 0.6s ease both;
+}
+
+.stores-stat-card:nth-child(1) { animation-delay: 0.05s; }
+.stores-stat-card:nth-child(2) { animation-delay: 0.1s; }
+.stores-stat-card:nth-child(3) { animation-delay: 0.15s; }
+.stores-stat-card:nth-child(4) { animation-delay: 0.2s; }
+
+.stores-stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 30px rgba(139, 92, 246, 0.12);
+}
+
+.stores-stat-value {
+  font-size: 2rem;
+  font-weight: 900;
+  color: #7C3AED;
+  margin: 0 0 0.25rem;
+}
+
+.stores-stat-label {
+  color: #6B7280;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================================
+   SECCIÓN MARCAS
+   ============================================ */
+.stores-section {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2rem 2rem 5rem;
+}
+
+.stores-section-title {
+  font-size: 2.25rem;
+  font-weight: 900;
+  color: #1F2937;
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+
+.stores-section-subtitle {
+  text-align: center;
+  font-size: 1.1rem;
+  color: #6B7280;
+  margin-bottom: 3rem;
+}
+
+.stores-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+}
+
+/* ============================================
+   TARJETA DE TIENDA
+   ============================================ */
+.store-card {
+  background: white;
+  border-radius: 1.25rem;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid #F3F4F6;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: fadeInUp 0.6s ease both;
+}
+
+.store-card:nth-child(1) { animation-delay: 0.05s; }
+.store-card:nth-child(2) { animation-delay: 0.1s; }
+.store-card:nth-child(3) { animation-delay: 0.15s; }
+.store-card:nth-child(4) { animation-delay: 0.2s; }
+.store-card:nth-child(5) { animation-delay: 0.25s; }
+.store-card:nth-child(6) { animation-delay: 0.3s; }
+.store-card:nth-child(7) { animation-delay: 0.35s; }
+.store-card:nth-child(8) { animation-delay: 0.4s; }
+.store-card:nth-child(9) { animation-delay: 0.45s; }
+.store-card:nth-child(10) { animation-delay: 0.5s; }
+.store-card:nth-child(11) { animation-delay: 0.55s; }
+.store-card:nth-child(12) { animation-delay: 0.6s; }
+
+.store-card:hover {
+  transform: translateY(-8px) scale(1.03);
+  box-shadow: 0 16px 50px rgba(139, 92, 246, 0.18);
+}
+
+.store-card-image {
+  height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.store-card-emoji {
+  font-size: 3.5rem;
+  opacity: 0.8;
+  transition: all 0.4s ease;
+}
+
+.store-card:hover .store-card-emoji {
+  opacity: 1;
+  transform: scale(1.2);
+}
+
+.store-card-info {
+  padding: 1.25rem;
+  text-align: center;
+}
+
+.store-card-name {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #1F2937;
+  margin: 0 0 0.35rem;
+}
+
+.store-card-category {
+  display: inline-block;
+  background: #F3F4F6;
+  color: #6B7280;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.2rem 0.75rem;
+  border-radius: 50px;
+}
+
+/* ============================================
+   CÓMO FUNCIONA MINI
+   ============================================ */
+.stores-how {
+  background: #F9FAFB;
+  padding: 4rem 2rem;
+  text-align: center;
+}
+
+.stores-how-title {
+  font-size: 2rem;
+  font-weight: 900;
+  color: #1F2937;
+  margin-bottom: 2.5rem;
+}
+
+.stores-how-steps {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.stores-how-step {
+  flex: 1;
+  background: white;
+  border-radius: 1.25rem;
+  padding: 2rem 1.5rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+}
+
+.stores-how-step:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 30px rgba(139, 92, 246, 0.12);
+}
+
+.stores-how-emoji {
+  font-size: 2.5rem;
+  display: block;
+  margin-bottom: 0.75rem;
+}
+
+.stores-how-step h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #1F2937;
+  margin: 0 0 0.5rem;
+}
+
+.stores-how-step p {
+  color: #6B7280;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.stores-how-arrow {
+  font-size: 1.5rem;
+  color: #8B5CF6;
+  font-weight: 700;
+}
+
+/* ============================================
+   CTA
+   ============================================ */
+.stores-cta {
+  background: linear-gradient(135deg, #7C3AED 0%, #6D28D9 100%);
+  padding: 4rem 2rem;
+  text-align: center;
+  color: white;
+}
+
+.stores-cta h2 {
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: 0.75rem;
+}
+
+.stores-cta p {
+  font-size: 1.1rem;
+  opacity: 0.9;
+  margin-bottom: 2rem;
+}
+
+.btn-stores-cta {
+  display: inline-block;
+  padding: 1rem 2.5rem;
+  background: white;
+  color: #7C3AED;
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 1.1rem;
+  text-decoration: none;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+}
+
+.btn-stores-cta:hover {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+  color: #7C3AED;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 1023px) {
+  .stores-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .stores-hero-title {
+    font-size: 2rem;
+  }
+
+  .stores-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .stores-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .stores-how-steps {
+    flex-direction: column;
+  }
+
+  .stores-how-arrow {
+    transform: rotate(90deg);
+  }
+
+  .stores-cta h2 {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .stores-grid {
+    grid-template-columns: 1fr;
+    max-width: 300px;
+    margin: 0 auto;
+  }
+
+  .stores-stats {
+    grid-template-columns: 1fr;
+    max-width: 300px;
+  }
+}

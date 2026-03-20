@@ -9,10 +9,10 @@ export const Jumbotron = () => {
     <div className="jumbotron-custom">
 
       {/*RIDERS DISPONIBLES AHORA */}
-      <div className="badge-disponible">
+      {/* <div className="badge-disponible">
         <span className="dot-green"></span>
         Riders disponibles ahora
-      </div>
+      </div> */}
 
       <div className="jumbotron-container">
 
@@ -34,10 +34,10 @@ export const Jumbotron = () => {
 
           {/* BOTONES ACCION */}
           <div className="jumbotron-buttons">
-            <Link to="/hacer-pedido" className="btn-primary-hero">
+            <Link to="/register" className="btn-primary-hero">
               Solicitar Entrega →
             </Link>
-            <a href="/riders" className="btn-secondary-hero">
+            <a href="/Foriders" className="btn-secondary-hero">
               📦 Soy Rider
             </a>
           </div>
