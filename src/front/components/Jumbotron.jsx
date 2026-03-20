@@ -34,7 +34,7 @@ export const Jumbotron = () => {
 
           {/* BOTONES ACCION */}
           <div className="jumbotron-buttons">
-            <Link to="/register" className="btn-primary-hero">
+            <Link to="/hacer-pedido" className="btn-primary-hero">
               Solicitar Entrega →
             </Link>
             <a href="/Foriders" className="btn-secondary-hero">
