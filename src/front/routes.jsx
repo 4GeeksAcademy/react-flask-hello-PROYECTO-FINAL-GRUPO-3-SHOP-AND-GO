@@ -14,7 +14,7 @@ import { Help } from "./pages/Help";
 import { Profileuser } from "./pages/Profileuser";
 import { ProfileDriver } from "./pages/ProfileDriver";
 import HacerPedido from "./pages/HacerPedido";
-// import { Stores } from "./pages/Stores";
+import { Stores } from "./pages/Stores";
 
 export const router = createBrowserRouter(
     createRoutesFromElements(
@@ -32,7 +32,7 @@ export const router = createBrowserRouter(
         <Route path="/Profileuser" element={<Profileuser/>}/> {/* Perfil usuario*/}
         <Route path="/driver/profile" element={<ProfileDriver/>}/> {/* URGENTE CAMBIAR RUTA*/}
         <Route path="/hacer-pedido" element={<HacerPedido />} />
-        {/* <Route path="/Stores" element={<Stores/>}/> TIENDAS */}
+        <Route path="/Stores" element={<Stores/>}/>
       </Route>
     )
 )
