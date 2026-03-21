@@ -51,9 +51,11 @@ export const Stores = () => {
     const loadStores = async () => {
       try {
         const token = getToken();
-        const headers = token ? { "Authorization": `Bearer ${token}` } : {};
+        if (!token) { navigate("/store-info"); return; }
 
-        const response = await fetch(`${API_URL}/api/stores`, { headers });
+        const response = await fetch(`${API_URL}/api/stores`, {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
 
         if (response.ok) {
           const data = await response.json();
@@ -61,8 +63,7 @@ export const Stores = () => {
           setStores(storesList);
           setFilteredStores(storesList);
         } else {
-          setStores([]);
-          setFilteredStores([]);
+          navigate("/store-info");
         }
       } catch (error) {
         console.error(error);
@@ -110,7 +111,6 @@ export const Stores = () => {
   const startQrScanner = () => {
     setScanning(true);
     setQrError("");
-
     setTimeout(() => {
       const html5QrCode = new Html5Qrcode("qr-reader");
       html5QrCode.start(
@@ -119,7 +119,6 @@ export const Stores = () => {
         (decodedText) => {
           html5QrCode.stop();
           setScanning(false);
-
           if (decodedText === selectedStore.qr_code) {
             setShowQrModal(false);
             setShowOrderModal(true);
@@ -305,7 +304,7 @@ export const Stores = () => {
             {filteredStores.map(store => (
               <div key={store.id} className="store-card">
 
-                {/* QR DE LA TIENDA */}
+                {/* QR */}
                 <div style={{
                   display: "flex", justifyContent: "center", alignItems: "center",
                   padding: "1.5rem", background: "linear-gradient(135deg, #f5f3ff, #ede9fe)"
@@ -325,25 +324,18 @@ export const Stores = () => {
                   <p className="store-address">📍 {store.street}, {store.city}</p>
                   <p className="store-postal">📮 {store.postal_code}</p>
 
-                  {/* BOTONES ADMIN */}
                   {currentUser?.role === "admin" && (
                     <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1rem" }}>
                       <button
                         onClick={() => { setEditingStore({ ...store }); setShowEditStoreModal(true); }}
-                        style={{
-                          flex: 1, padding: "0.5rem", background: "#f5f3ff", color: "#7C3AED",
-                          border: "2px solid #e9d5ff", borderRadius: "10px", fontWeight: "700", cursor: "pointer"
-                        }}
+                        style={{ flex: 1, padding: "0.5rem", background: "#f5f3ff", color: "#7C3AED", border: "2px solid #e9d5ff", borderRadius: "10px", fontWeight: "700", cursor: "pointer" }}
                       >
                         ✏️ Editar
                       </button>
                       {store.is_active && (
                         <button
                           onClick={() => handleDeactivateStore(store.id)}
-                          style={{
-                            flex: 1, padding: "0.5rem", background: "#fee2e2", color: "#991b1b",
-                            border: "2px solid #fca5a5", borderRadius: "10px", fontWeight: "700", cursor: "pointer"
-                          }}
+                          style={{ flex: 1, padding: "0.5rem", background: "#fee2e2", color: "#991b1b", border: "2px solid #fca5a5", borderRadius: "10px", fontWeight: "700", cursor: "pointer" }}
                         >
                           🚫 Desactivar
                         </button>
@@ -378,21 +370,17 @@ export const Stores = () => {
               <h2>📷 Escanear QR</h2>
               <button className="modal-close" onClick={stopQrScanner}>✕</button>
             </div>
-
             <div style={{ textAlign: "center", marginBottom: "1.5rem" }}>
               <p style={{ color: "#6b7280" }}>
-                Escanea el código QR de <strong style={{ color: "#7C3AED" }}>{selectedStore.name}</strong> para continuar con tu pedido.
+                Escanea el código QR de <strong style={{ color: "#7C3AED" }}>{selectedStore.name}</strong> para continuar.
               </p>
             </div>
-
             <div id="qr-reader" style={{ width: "100%", borderRadius: "12px", overflow: "hidden" }}></div>
-
             {qrError && (
               <div style={{ background: "#fee2e2", border: "2px solid #fca5a5", borderRadius: "12px", padding: "1rem", color: "#991b1b", marginTop: "1rem", fontWeight: "600" }}>
                 {qrError}
               </div>
             )}
-
             <div className="modal-actions">
               <button className="btn-cancel" onClick={stopQrScanner}>Cancelar</button>
               <button className="btn-save" onClick={startQrScanner} disabled={scanning}>
@@ -411,26 +399,19 @@ export const Stores = () => {
               <h2>🛒 Nuevo Pedido</h2>
               <button className="modal-close" onClick={() => setShowOrderModal(false)}>✕</button>
             </div>
-
             <div className="store-selected-box">
               <div className="store-selected-name">🏪 {selectedStore.name}</div>
               <div className="store-selected-address">📍 {selectedStore.street}, {selectedStore.city}</div>
             </div>
-
             <div className="modal-input-group">
               <label>📍 Dirección de entrega</label>
               {addresses.length === 0 ? (
                 <div style={{ background: "#fef3c7", border: "2px solid #fde68a", borderRadius: "12px", padding: "1rem", color: "#92400e" }}>
                   ⚠️ No tienes direcciones guardadas.
-                  <a href="/Profileuser" style={{ color: "#7C3AED", fontWeight: "700", marginLeft: "0.5rem" }}>
-                    Añadir dirección
-                  </a>
+                  <a href="/Profileuser" style={{ color: "#7C3AED", fontWeight: "700", marginLeft: "0.5rem" }}>Añadir dirección</a>
                 </div>
               ) : (
-                <select
-                  value={orderData.address_id}
-                  onChange={(e) => setOrderData({ ...orderData, address_id: e.target.value })}
-                >
+                <select value={orderData.address_id} onChange={(e) => setOrderData({ ...orderData, address_id: e.target.value })}>
                   <option value="">Selecciona una dirección</option>
                   {addresses.map(addr => (
                     <option key={addr.id} value={addr.id}>
@@ -440,27 +421,14 @@ export const Stores = () => {
                 </select>
               )}
             </div>
-
             <div className="modal-input-group">
               <label>🛍️ Número de bolsas</label>
-              <input
-                type="number" min="1" max="20"
-                value={orderData.bags_count}
-                onChange={(e) => setOrderData({ ...orderData, bags_count: e.target.value })}
-              />
+              <input type="number" min="1" max="20" value={orderData.bags_count} onChange={(e) => setOrderData({ ...orderData, bags_count: e.target.value })} />
             </div>
-
             <div className="modal-input-group">
               <label>📝 Notas (opcional)</label>
-              <textarea
-                placeholder="Instrucciones especiales, referencias..."
-                value={orderData.notes}
-                onChange={(e) => setOrderData({ ...orderData, notes: e.target.value })}
-                rows={3}
-                style={{ resize: "none" }}
-              />
+              <textarea placeholder="Instrucciones especiales..." value={orderData.notes} onChange={(e) => setOrderData({ ...orderData, notes: e.target.value })} rows={3} style={{ resize: "none" }} />
             </div>
-
             <div className="modal-actions">
               <button className="btn-cancel" onClick={() => setShowOrderModal(false)}>Cancelar</button>
               <button className="btn-save" onClick={handleCreateOrder}>🛒 Confirmar Pedido</button>
@@ -477,7 +445,6 @@ export const Stores = () => {
               <h2>🏪 Nueva Tienda</h2>
               <button className="modal-close" onClick={() => setShowAddStoreModal(false)}>✕</button>
             </div>
-
             {[
               { label: "Nombre de la tienda", name: "name", placeholder: "Ej: Zara Gran Vía" },
               { label: "Calle y número", name: "street", placeholder: "Ej: Calle Gran Vía 32" },
@@ -486,15 +453,9 @@ export const Stores = () => {
             ].map(field => (
               <div key={field.name} className="modal-input-group">
                 <label>{field.label}</label>
-                <input
-                  type="text"
-                  placeholder={field.placeholder}
-                  value={newStore[field.name]}
-                  onChange={(e) => setNewStore({ ...newStore, [field.name]: e.target.value })}
-                />
+                <input type="text" placeholder={field.placeholder} value={newStore[field.name]} onChange={(e) => setNewStore({ ...newStore, [field.name]: e.target.value })} />
               </div>
             ))}
-
             <div className="modal-actions">
               <button className="btn-cancel" onClick={() => setShowAddStoreModal(false)}>Cancelar</button>
               <button className="btn-save" onClick={handleCreateStore}>✅ Crear Tienda</button>
@@ -511,7 +472,6 @@ export const Stores = () => {
               <h2>✏️ Editar Tienda</h2>
               <button className="modal-close" onClick={() => setShowEditStoreModal(false)}>✕</button>
             </div>
-
             {[
               { label: "Nombre de la tienda", name: "name" },
               { label: "Calle y número", name: "street" },
@@ -520,14 +480,9 @@ export const Stores = () => {
             ].map(field => (
               <div key={field.name} className="modal-input-group">
                 <label>{field.label}</label>
-                <input
-                  type="text"
-                  value={editingStore[field.name]}
-                  onChange={(e) => setEditingStore({ ...editingStore, [field.name]: e.target.value })}
-                />
+                <input type="text" value={editingStore[field.name]} onChange={(e) => setEditingStore({ ...editingStore, [field.name]: e.target.value })} />
               </div>
             ))}
-
             <div className="modal-actions">
               <button className="btn-cancel" onClick={() => setShowEditStoreModal(false)}>Cancelar</button>
               <button className="btn-save" onClick={handleEditStore}>💾 Guardar Cambios</button>

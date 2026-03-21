@@ -3,6 +3,7 @@ import {
   createRoutesFromElements,
   Route,
 } from "react-router-dom";
+import { StoreInfo } from "./pages/StoreInfo";
 import { Layout } from "./pages/Layout";
 import { Home } from "./pages/Home";
 import { Single } from "./pages/Single";
@@ -33,6 +34,7 @@ export const router = createBrowserRouter(
         <Route path="/Foriders" element={<Foriders />} />
         <Route path="/Help" element={<Help />} />
         <Route path="/Stores" element={<Stores />} />
+        <Route path="/store-info" element={<StoreInfo/>}/>
  
         {/* Rutas protegidas - solo USUARIO */}
         <Route path="/Profileuser" element={
