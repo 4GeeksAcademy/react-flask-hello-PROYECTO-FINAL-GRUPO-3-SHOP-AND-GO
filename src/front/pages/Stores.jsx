@@ -7,13 +7,19 @@ import "../Stores.css";
 
 const API_URL = import.meta.env.VITE_BACKEND_URL;
 
-const CATEGORIES = ["Todas", "Moda", "Electrónica", "Supermercado", "Deportes", "Hogar", "Otros"];
+const CATEGORIES = ["Todas", "Moda", "Electrónica", "Deportes", ];
+
+const CATEGORY_ICONS = {   // ✅ NUEVO
+  "Moda": "👗",
+  "Electrónica": "💻",
+  "Deportes": "⚽",
+};
 
 export const Stores = () => {
   const navigate = useNavigate();
   const [stores, setStores] = useState([]);
   const [filteredStores, setFilteredStores] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("Todas");
   const [selectedStore, setSelectedStore] = useState(null);
@@ -27,7 +33,7 @@ export const Stores = () => {
   const [showToast, setShowToast] = useState(false);
   const [toastMsg, setToastMsg] = useState("");
   const [currentUser, setCurrentUser] = useState(null);
-  const [newStore, setNewStore] = useState({ name: "", street: "", city: "", postal_code: "" });
+  const [newStore, setNewStore] = useState({ name: "", street: "", city: "", postal_code: "", category: "" });  // ✅ NUEVO: añadido category
   const [scanning, setScanning] = useState(false);
   const [qrError, setQrError] = useState("");
 
@@ -98,6 +104,9 @@ export const Stores = () => {
         s.name.toLowerCase().includes(search.toLowerCase()) ||
         s.city.toLowerCase().includes(search.toLowerCase())
       );
+    }
+    if (activeCategory !== "Todas") {  // ✅ NUEVO: filtro por categoría
+      result = result.filter(s => s.category === activeCategory);
     }
     setFilteredStores(result);
   }, [search, activeCategory, stores]);
@@ -184,14 +193,14 @@ export const Stores = () => {
       const response = await fetch(`${API_URL}/api/stores`, {
         method: "POST",
         headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ ...newStore, qr_code: autoQrCode })
+        body: JSON.stringify({ ...newStore, qr_code: autoQrCode })  // category ya viene dentro de newStore
       });
       const data = await response.json();
       if (response.ok) {
         setStores(prev => [...prev, data.store]);
         setFilteredStores(prev => [...prev, data.store]);
         setShowAddStoreModal(false);
-        setNewStore({ name: "", street: "", city: "", postal_code: "" });
+        setNewStore({ name: "", street: "", city: "", postal_code: "", category: "" });  // ✅ NUEVO: reset con category
         triggerToast("✅ Tienda creada correctamente");
       } else {
         triggerToast(`❌ ${data.error}`);
@@ -244,7 +253,7 @@ export const Stores = () => {
     }
   };
 
-  if (loading) return <div className="loading">Cargando tiendas...</div>;
+  if (loading) return <div></div>;
 
   return (
     <div className="stores-page">
@@ -321,6 +330,12 @@ export const Stores = () => {
                       {store.is_active ? "✅ Abierta" : "❌ Cerrada"}
                     </span>
                   </div>
+                  {/* ✅ NUEVO: mostrar categoría en la tarjeta */}
+                  {store.category && (
+                    <p style={{ fontSize: "0.85rem", color: "#7C3AED", fontWeight: "600", marginBottom: "0.4rem" }}>
+                      {CATEGORY_ICONS[store.category]} {store.category}
+                    </p>
+                  )}
                   <p className="store-address">📍 {store.street}, {store.city}</p>
                   <p className="store-postal">📮 {store.postal_code}</p>
 
@@ -456,6 +471,19 @@ export const Stores = () => {
                 <input type="text" placeholder={field.placeholder} value={newStore[field.name]} onChange={(e) => setNewStore({ ...newStore, [field.name]: e.target.value })} />
               </div>
             ))}
+            {/* ✅ NUEVO: selector de categoría */}
+            <div className="modal-input-group">
+              <label>🏷️ Categoría de la tienda</label>
+              <select
+                value={newStore.category}
+                onChange={(e) => setNewStore({ ...newStore, category: e.target.value })}
+              >
+                <option value="">Sin categoría</option>
+                <option value="Moda">👗 Moda</option>
+                <option value="Electrónica">💻 Electrónica</option>
+                <option value="Deportes">⚽ Deportes</option>
+              </select>
+            </div>
             <div className="modal-actions">
               <button className="btn-cancel" onClick={() => setShowAddStoreModal(false)}>Cancelar</button>
               <button className="btn-save" onClick={handleCreateStore}>✅ Crear Tienda</button>
@@ -483,6 +511,19 @@ export const Stores = () => {
                 <input type="text" value={editingStore[field.name]} onChange={(e) => setEditingStore({ ...editingStore, [field.name]: e.target.value })} />
               </div>
             ))}
+            {/* ✅ NUEVO: selector de categoría en edición */}
+            <div className="modal-input-group">
+              <label>🏷️ Categoría de la tienda</label>
+              <select
+                value={editingStore.category || ""}
+                onChange={(e) => setEditingStore({ ...editingStore, category: e.target.value })}
+              >
+                <option value="">Sin categoría</option>
+                <option value="Moda">👗 Moda</option>
+                <option value="Electrónica">💻 Electrónica</option>
+                <option value="Deportes">⚽ Deportes</option>
+              </select>
+            </div>
             <div className="modal-actions">
               <button className="btn-cancel" onClick={() => setShowEditStoreModal(false)}>Cancelar</button>
               <button className="btn-save" onClick={handleEditStore}>💾 Guardar Cambios</button>
