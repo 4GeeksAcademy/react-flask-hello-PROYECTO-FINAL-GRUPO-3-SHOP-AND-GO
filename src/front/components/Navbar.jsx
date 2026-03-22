@@ -43,7 +43,11 @@ export const Navbar = () => {
 
 						{token ? (
 							<>
-								<Link className="nav-link" to={localStorage.getItem("role") === "driver" ? "/driver/profile" : "/Profileuser"}>Mi Perfil</Link>
+								{localStorage.getItem("role") === "admin" ? (
+									<Link className="nav-link" to="/Profileuser">Panel Admin</Link>
+								) : (
+									<Link className="nav-link" to={localStorage.getItem("role") === "driver" ? "/driver/profile" : "/Profileuser"}>Mi Perfil</Link>
+								)}
 								<button className="btn-register" onClick={handleLogout}>Cerrar sesión</button>
 							</>
 						) : (

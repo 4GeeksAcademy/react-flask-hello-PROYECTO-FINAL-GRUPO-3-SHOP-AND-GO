@@ -136,3 +136,15 @@
     margin-left: 0 !important;
   }
 }
+
+.footer-logo-img {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    object-fit: cover;
+    filter: brightness(1.2) saturate(1.5) hue-rotate(-5deg);
+}
+
+.footer-logo-row {
+    text-decoration: none;
+}
