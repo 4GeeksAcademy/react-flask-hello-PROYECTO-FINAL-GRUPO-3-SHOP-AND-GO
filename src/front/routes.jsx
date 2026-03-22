@@ -38,7 +38,7 @@ export const router = createBrowserRouter(
  
         {/* Rutas protegidas - solo USUARIO */}
         <Route path="/Profileuser" element={
-          <PrivateRoute allowedRoles={["user"]}>
+          <PrivateRoute allowedRoles={["user", "admin"]}>
             <Profileuser />
           </PrivateRoute>
         } />

@@ -94,6 +94,25 @@ export const getOrders = async () => {
 };
 
 //========================================
+//GET USERS (admin)
+//========================================
+export const getUsers = async () => {
+    const token = localStorage.getItem("token");
+
+    const response = await fetch(import.meta.env.VITE_BACKEND_URL + "/api/users", {
+        method: "GET",
+        headers: {
+            "Authorization": "Bearer " + token,
+            "Content-Type": "application/json"
+        }
+    });
+
+    const data = await response.json();
+    return data;
+};
+
+
+//========================================
 //GET PROFILE
 //========================================
 export const getProfile = async () => {
