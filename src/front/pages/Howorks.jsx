@@ -6,9 +6,9 @@ export const Howorks = () => {
             number: 1,
             emoji: "🛍️",
             title: "Haz tu compra en tienda",
-            description: "Visita las tiendas con el QR de SHO&GO y realiza tu compra como siempre. Puedes comprar ropa, electrónica, libros, o lo que necesites.",
+            description: "Visita las tiendas con el QR de SHOP&GO y realiza tu compra como siempre. Puedes comprar ropa, electrónica, libros, o lo que necesites.",
             features: [
-                "Compatible con tiendas ASOCIADAS a SHO&GO en todo España",
+                "Compatible con tiendas ASOCIADAS a SHOP&GO en todo España",
                 "Sin restricciones de productos",
                 "Compra como siempre lo haces"
             ],
@@ -18,11 +18,11 @@ export const Howorks = () => {
             number: 2,
             emoji: "📱",
             title: "Solicita tu entrega",
-            description: "Abre la app de SHOP&GO, escanea el QR con tu perfil, introduce la tienda asociada y tu dirección de entrega. Es rápido y sencillo.",
+            description: "Abre la app de SHOP&GO, introduce la tienda asociada y tu dirección de entrega. Es rápido y sencillo.",
             features: [
-                "Interfaz intuitiva y fácil",
+                "APP intuitiva y fácil",
                 "Precio transparente al instante",
-                "Múltiples métodos de pago con tarjeta"
+                "Métodos de pago: tarjeta"
             ],
             gradient: "linear-gradient(135deg, #8B5CF6, #7C3AED)"
         },
@@ -42,7 +42,7 @@ export const Howorks = () => {
             number: 4,
             emoji: "📦",
             title: "Recibe en tu puerta",
-            description: "El rider recoge tu compra en la tienda y te la entrega directamente en la puerta de tu casa en minutos.",
+            description: "El rider recoge tu compra en la tienda y la entrega directamente en tu dirrecion registrada en minutos.",
             features: [
                 "Entrega en menos de 60 min",
                 "Notificación al llegar",

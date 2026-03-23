@@ -10,6 +10,8 @@ const BRANDS = [
   { name: "Massimo Dutti", category: "Moda", description: "Estilo sofisticado y elegante para hombre y mujer." },
   { name: "Nike", category: "Deportes", description: "Ropa y calzado deportivo de alto rendimiento." },
   { name: "Adidas", category: "Deportes", description: "Equipamiento deportivo y lifestyle de clase mundial." },
+  { name: "Apple Store", category: "Tecnología", description: "Gran variedad de productos tecnológicos." },
+
  
 ];
 
