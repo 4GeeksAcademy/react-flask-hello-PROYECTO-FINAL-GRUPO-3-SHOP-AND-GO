@@ -44,7 +44,7 @@
 
 .final-status-box {
     min-width: 210px;
-    background: linear-gradient(135deg, #7c3aed 0%, #c026d3 100%);
+    background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 50%, #6D28D9 100%);
     color: #ffffff;
     border-radius: 20px;
     padding: 18px 20px;
@@ -135,7 +135,7 @@
 }
 
 .final-actions .btn-dark {
-    background: linear-gradient(135deg, #7c3aed 0%, #a21caf 100%);
+    background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 50%, #6D28D9 100%) !important;
     color: #ffffff;
     border: none;
 }
