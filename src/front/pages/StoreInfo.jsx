@@ -4,20 +4,20 @@ import { getToken } from "../Services/authService";
 
 const BRANDS = [
   { name: "Zara", category: "Moda", description: "Ropa, calzado y accesorios de las últimas tendencias." },
-  { name: "Gucci", category: "Lujo", description: "Moda italiana de lujo con diseños icónicos y exclusivos." },
+  { name: "Gucci", category: "Moda", description: "Moda italiana de lujo con diseños icónicos y exclusivos." },
   { name: "Mango", category: "Moda", description: "Prendas modernas y sofisticadas para el día a día." },
-  { name: "Carolina Herrera", category: "Lujo", description: "Alta costura y elegancia atemporal con sello venezolano." },
+  { name: "Carolina Herrera", category: "Moda", description: "Alta costura y elegancia atemporal con sello venezolano." },
   { name: "H&M", category: "Moda", description: "Moda accesible y sostenible para toda la familia." },
-  { name: "El Corte Inglés", category: "Gran Almacén", description: "Todo en un solo lugar: moda, tecnología, hogar y más." },
+ // { name: "El Corte Inglés", category: "Gran Almacén", description: "Todo en un solo lugar: moda, tecnología, hogar y más." },
   { name: "Massimo Dutti", category: "Moda", description: "Estilo sofisticado y elegante para hombre y mujer." },
   { name: "Pull & Bear", category: "Moda", description: "Moda urbana y casual para jóvenes con estilo propio." },
   { name: "Bershka", category: "Moda", description: "Tendencias actuales con actitud joven y atrevida." },
   { name: "Nike", category: "Deportes", description: "Ropa y calzado deportivo de alto rendimiento." },
   { name: "Adidas", category: "Deportes", description: "Equipamiento deportivo y lifestyle de clase mundial." },
-  { name: "Sephora", category: "Belleza", description: "Cosmética, perfumería y cuidado personal de las mejores marcas." },
-  { name: "Apple Store", category: "Tecnología", description: "Dispositivos Apple, accesorios y soporte técnico." },
-  { name: "IKEA", category: "Hogar", description: "Muebles y soluciones para el hogar con diseño escandinavo." },
-  { name: "Mercadona", category: "Supermercado", description: "Productos frescos y de calidad para tu despensa diaria." },
+ // { name: "Sephora", category: "Belleza", description: "Cosmética, perfumería y cuidado personal de las mejores marcas." },
+ // { name: "Apple Store", category: "Tecnología", description: "Dispositivos Apple, accesorios y soporte técnico." },
+ // { name: "IKEA", category: "Hogar", description: "Muebles y soluciones para el hogar con diseño escandinavo." },
+ // { name: "Mercadona", category: "Supermercado", description: "Productos frescos y de calidad para tu despensa diaria." },
 ];
 
 const CATEGORY_COLORS = {
