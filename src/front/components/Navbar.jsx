@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { getToken, logout } from "../Services/authService";
 import { useNavigate } from "react-router-dom";
-import logoImg from "/workspaces/react-flask-hello-PROYECTO-FINAL-GRUPO-3-SHOP-AND-GO/src/front/assets/logo.png";
+import logoImg from "/logo.png";
 
 export const Navbar = () => {
 	const token = getToken();
