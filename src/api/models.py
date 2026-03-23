@@ -109,6 +109,7 @@ class Store(db.Model):
     postal_code: Mapped[str] = mapped_column(String(10), nullable=False)
     latitude: Mapped[float] = mapped_column(Float, nullable=True)
     longitude: Mapped[float] = mapped_column(Float, nullable=True)
+    category: Mapped[str] = mapped_column(String(50), nullable=True)  # ✅ NUEVO
 
     orders: Mapped[list["Order"]] = relationship(back_populates="store")
 
@@ -122,7 +123,8 @@ class Store(db.Model):
             "city": self.city,
             "postal_code": self.postal_code,
             "latitude": self.latitude,
-            "longitude": self.longitude
+            "longitude": self.longitude,
+            "category": self.category  # ✅ NUEVO
         }
 
 

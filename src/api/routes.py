@@ -788,6 +788,7 @@ def create_store():
     street = data.get("street")
     city = data.get("city")
     postal_code = data.get("postal_code")
+    category = data.get("category", None)  # ✅ NUEVO
 
     if not name or not qr_code or not street or not city or not postal_code:
         return jsonify({
@@ -811,7 +812,8 @@ def create_store():
             city=city,
             postal_code=postal_code,
             latitude=geo_data["lat"],
-            longitude=geo_data["lon"]
+            longitude=geo_data["lon"],
+            category=category  # ✅ NUEVO
         )
 
         db.session.add(new_store)
@@ -926,6 +928,10 @@ def update_store(store_id):
             if not data["postal_code"]:
                 return jsonify({"error": "postal_code cannot be empty"}), 400
             store.postal_code = str(data["postal_code"])
+
+        # ✅ NUEVO — actualizar categoría si viene en el body
+        if "category" in data:
+            store.category = data["category"]
 
         # Si cambia cualquier campo de dirección, recalculamos coordenadas
         if "street" in data or "city" in data or "postal_code" in data:
